@@ -1,0 +1,9 @@
+.pytest_cache/
+.venv/
+.vscode/
+data/
+tests/__pycache__/
+*.xlsx
+*.xls
+.env
+tmp.md
