@@ -7,3 +7,4 @@ tests/__pycache__/
 *.xls
 .env
 tmp.md
+.DS_Store
