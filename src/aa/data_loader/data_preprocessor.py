@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple
 import logging
 from aa.data_loader.base_loader import BaseDataLoader
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 

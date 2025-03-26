@@ -3,6 +3,7 @@
 .vscode/
 data/
 **/__pycache__/
+reports/
 *.xlsx
 *.xls
 .env
