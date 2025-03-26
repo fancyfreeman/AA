@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 
 def gather_table_heads():
     # 读取配置文件
-    config_file = "/Users/chenxin/Dev/AA/config/data_regions_config.xlsx"
+    config_file = "/Users/chenxin/Dev/AA/config/data_extraction_config.xlsx"
     config_df = pd.read_excel(config_file, sheet_name='multi_sheet_df')
 
     # 初始化输出文件

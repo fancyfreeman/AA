@@ -8,3 +8,4 @@ tests/__pycache__/
 .env
 tmp.md
 .DS_Store
+*.pyc

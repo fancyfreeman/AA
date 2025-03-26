@@ -14,15 +14,16 @@ class DataPreprocessor(BaseDataLoader):
 
     def __init__(
         self,
-        config_path: str,
-        raw_data_dir: str = "data/raw",
-        output_dir: str = "data/processed",
+        data_extraction_config_file = "config/data_extraction_config.xlsx",
+        raw_data_dir = "data/raw",
+        data_output_dir = "data/processed",
     ):
         super().__init__()
-        self.config_path = config_path
+        self.data_extraction_config_file = data_extraction_config_file
         self.raw_data_dir = Path(raw_data_dir)
-        self.output_path = Path(output_dir) / "data_preprocessed.xlsx"
-        self.output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.data_output_dir = Path(data_output_dir)
+        self.data_output_file = Path(data_output_dir) / "data_preprocessed.xlsx"
+        self.data_output_file.parent.mkdir(parents=True, exist_ok=True)
 
     def load(self, config: dict = None) -> dict:
         """主处理入口"""
@@ -35,7 +36,7 @@ class DataPreprocessor(BaseDataLoader):
                 return {
                     "status": "success",
                     "record_count": len(df_dict),
-                    "output_path": str(self.output_path),
+                    "data_output_dir": str(self.data_output_dir),
                 }
             except ValueError as e:
                 logger.info(f"尝试新版配置格式: {e}")
@@ -191,9 +192,15 @@ class DataPreprocessor(BaseDataLoader):
 
     def _parse_config(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """解析新版配置文件"""
-        multi_df = pd.read_excel(self.config_path, sheet_name="multi_sheet_df")
-        single_df = pd.read_excel(self.config_path, sheet_name="single_sheet_df")
-        groups_df = pd.read_excel(self.config_path, sheet_name="分行分组")
+        multi_df = pd.read_excel(
+            self.data_extraction_config_file, sheet_name="multi_sheet_df"
+        )
+        single_df = pd.read_excel(
+            self.data_extraction_config_file, sheet_name="single_sheet_df"
+        )
+        groups_df = pd.read_excel(
+            self.data_extraction_config_file, sheet_name="分行分组"
+        )
 
         # 验证必要字段
         required_multi = [
@@ -219,7 +226,7 @@ class DataPreprocessor(BaseDataLoader):
         """保存结果到Excel"""
         # pylint: disable=abstract-class-instantiated
         # 使用openpyxl引擎时ExcelWriter需要忽略抽象类实例化警告
-        with pd.ExcelWriter(self.output_path, engine="openpyxl", mode="w") as writer:  # type: ignore[abstract]
+        with pd.ExcelWriter(self.data_output_file, engine="openpyxl", mode="w") as writer:  # type: ignore[abstract]
             # 保存原始各sheet数据
             for sheet_name, df in data_dict.items():
                 df.to_excel(writer, sheet_name=sheet_name[:31], index=False)
