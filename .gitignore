@@ -2,7 +2,7 @@
 .venv/
 .vscode/
 data/
-tests/__pycache__/
+**/__pycache__/
 *.xlsx
 *.xls
 .env

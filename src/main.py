@@ -37,17 +37,16 @@ def main():
 
     try:
         match args.command:
-            case "2":
-                # 初始化报告生成器
-
-                generator = ReportGenerator(args.report_config_file, data_output_file)
-                report = generator.generate({})
-                logger.info("报告生成完毕")
             case "1":
-                processor = DataPreprocessor() #不传入参数值，参数使用默认值
+                processor = DataPreprocessor()  # 不传入参数值，参数使用默认值
                 result = processor.load()
                 logger.info(f"数据预处理完成，结果保存至：{data_output_file}")
                 logger.info(f"处理结果：{result}")
+            case "2":
+                # 初始化报告生成器
+                generator = ReportGenerator(args.report_config_file, data_output_file)
+                report = generator.generate({})
+                logger.info(f"处理结果：{report}")
     except FileNotFoundError as e:
         print(f"文件不存在：{e}")
     except Exception as e:

@@ -34,7 +34,7 @@ class ReportGenerator(BaseReportGenerator):
         except Exception as e:
             raise RuntimeError(f"初始化数据失败: {str(e)}") from e
 
-    def generate(self, analysis_results: Any) -> str:
+    def generate(self, analysis_results: Any) -> dict:
         """
         生成报告主入口
         :param analysis_results: 分析结果数据（暂未使用）
@@ -55,8 +55,8 @@ class ReportGenerator(BaseReportGenerator):
         import os
         from pathlib import Path
 
-        # report_dir = Path("data/reports")
-        report_dir = Path("/Users/chenxin/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/12 工作/项目/经营分析/AA分析报告")
+        report_dir = Path("reports/")
+        # report_dir = Path("/Users/chenxin/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/12 工作/项目/经营分析/AA分析报告")
         report_dir.mkdir(parents=True, exist_ok=True)
 
         # 清理文件名中的特殊字符
@@ -70,7 +70,11 @@ class ReportGenerator(BaseReportGenerator):
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(res)
 
-        return res
+        return {
+            "status": "success",
+            "report": res[:10],
+            "filepath": filepath
+        }
 
     def _process_head(self, head: dict) -> str:
         """处理报告头部信息"""
