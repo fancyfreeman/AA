@@ -2,12 +2,12 @@
 .venv/
 .vscode/
 data/
-**/__pycache__/
 reports/
+**/__pycache__/
 *.xlsx
 *.xls
 .env
 tmp.md
 .DS_Store
 *.pyc
-src/aa/report_generators/operators/__pycache__/default_operators.cpython-313.pyc
+
