@@ -4,10 +4,11 @@
 data/
 reports/
 **/__pycache__/
+*.py[cod]
 *.xlsx
 *.xls
 .env
 tmp.md
 .DS_Store
-*.pyc
+
 

@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import Any
+from pathlib import Path
 import re
 from aa.report_generators.base_generator import BaseReportGenerator
 from aa.utils.config_loader import load_config
@@ -8,7 +9,7 @@ from aa.report_generators.operators.default_operators import (
     RankingOperator,
     TrendOperator,
     CompletionRateOperator,
-    YearOverYearOperator, 
+    YearOverYearOperator,
     MonthOverMonthOperator
 )
 
@@ -45,36 +46,38 @@ class ReportGenerator(BaseReportGenerator):
 
         # 处理报告头部信息
         if 'head' in self.config:
-            report_content.append(self._process_head(self.config['head']))
+            # 如配置了多个机构，则逐一生成报告
+            org_name_list = self.config["head"]["org_name"].split()
+            for _ in org_name_list:
+                report_content = []
+                self.config["head"]["org_name"] = _
+                report_content.append(self._process_head(self.config['head']))
 
-        # 处理主体章节
-        report_content.append(self._process_sections(self.config.get('sections', [])))
+                # 处理主体章节
+                report_content.append(self._process_sections(self.config.get('sections', [])))
 
-        res = "\n".join(report_content)
+                res = "\n".join(report_content)
 
-        # 保存Markdown文件
-        import os
-        from pathlib import Path
+                # 保存Markdown文件
+                report_dir = Path("reports/")
+                # report_dir = Path("/Users/chenxin/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/12 工作/项目/经营分析/AA分析报告")
+                report_dir.mkdir(parents=True, exist_ok=True)
 
-        report_dir = Path("reports/")
-        # report_dir = Path("/Users/chenxin/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/12 工作/项目/经营分析/AA分析报告")
-        report_dir.mkdir(parents=True, exist_ok=True)
+                # 清理文件名中的特殊字符
+                safe_title = self.config['head']['title'].replace(" ", "_").replace(":", "-")
+                safe_org = self.config['head']['org_name'].replace(" ", "_").replace(":", "-")
+                safe_date = self.config['head']['data_dt'].replace(" ", "_").replace(":", "-")
 
-        # 清理文件名中的特殊字符
-        safe_title = self.config['head']['title'].replace(" ", "_").replace(":", "-")
-        safe_org = self.config['head']['org_name'].replace(" ", "_").replace(":", "-")
-        safe_date = self.config['head']['data_dt'].replace(" ", "_").replace(":", "-")
+                filename = f"{safe_title}_{safe_org}_{safe_date}.md"
+                filepath = report_dir / filename
 
-        filename = f"{safe_title}_{safe_org}_{safe_date}.md"
-        filepath = report_dir / filename
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(res)
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(res)
 
         return {
             "status": "success",
-            "report": res[:10],
-            "filepath": filepath
+            "org_name": org_name_list,
+            "report_dir": str(report_dir)
         }
 
     def _process_head(self, head: dict) -> str:

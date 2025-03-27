@@ -1,21 +1,19 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-
 import argparse
 from pathlib import Path
 from aa.report_generators.report_generator import ReportGenerator
 from aa.data_loader.data_preprocessor import DataPreprocessor
 from aa.utils.error_handler import handle_errors
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
 
 def main():
     """程序的主入口，解析命令行参数，执行数据预处理任务或者报告生成任务
     """
     parser = argparse.ArgumentParser(description='生成零售业务分析报告')
     parser.add_argument(
-        "--command", "-C", # 支持长短两种命令参数
+        "--task", "-T", # 支持长短两种命令参数
         type=str,
         default="2",
         choices=["2", "1"],
@@ -28,7 +26,7 @@ def main():
     config_path = Path(args.report_config_file)
     data_path = Path(data_output_file)
 
-    match args.command:
+    match args.task:
         case "1":
             data_extraction_config = Path("config/data_extraction_config.xlsx")
             if not data_extraction_config.exists():
@@ -48,14 +46,14 @@ def handle_data_preprocessing():
     """执行数据预处理任务"""
     processor = DataPreprocessor()
     result = processor.load()
-    logger.info(f"数据预处理完成：{result}")
+    logger.info("数据预处理完成：%s", result)
 
 @handle_errors
 def handle_report_generation(config_file: str, data_file: str):
     """执行报告生成任务"""
     generator = ReportGenerator(config_file, data_file)
     report = generator.generate({})
-    logger.info(f"报告生成完成：{report}")
+    logger.info("报告生成完成：%s", report)
 
 if __name__ == "__main__":
     main()
