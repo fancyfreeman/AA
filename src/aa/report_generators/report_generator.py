@@ -1,6 +1,8 @@
+import pandas as pd
+from typing import Any
+import re
 from aa.report_generators.base_generator import BaseReportGenerator
 from aa.utils.config_loader import load_config
-import pandas as pd
 from aa.report_generators.operators.default_operators import (
     CurrentValueOperator,
     RankingOperator,
@@ -9,8 +11,7 @@ from aa.report_generators.operators.default_operators import (
     YearOverYearOperator, 
     MonthOverMonthOperator
 )
-from typing import Any
-import re
+
 
 # 创建空的 DataFrame，指定列名和数据类型
 indicator_rank_df = pd.DataFrame(columns=["维度", "指标名称", "组内排名"], dtype="string")
@@ -137,7 +138,8 @@ class ReportGenerator(BaseReportGenerator):
             dimension_sub = re.sub(r"[\d\s]", "", dimension)
             output.append(f"#### {dimension_sub}\n")
             # 过滤当前维度的数据
-            df_filtered = indicator_rank_df[indicator_rank_df['维度'] == dimension]
+            df_filtered = indicator_rank_df[indicator_rank_df['维度'] == dimension].copy()
+            # df_filtered["指标名称"] = df_filtered["指标名称"].str[:30].str.ljust(30).str.replace(' ', '&nbsp;')
             # 生成表格
             output.append(
                 df_filtered[

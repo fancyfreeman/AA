@@ -1,5 +1,5 @@
-from aa.report_generators.operators.base_operator import BaseOperator
 import pandas as pd
+from aa.report_generators.operators.base_operator import BaseOperator
 
 # 全局变量 升序排名指标关键字
 asc_ordered_keywords = ["不良率", "成本率", "同业排名", "排名"]
@@ -9,6 +9,7 @@ percentage_keywords = ["率", "占比", "定价", "比例"]
 
 
 def pp(indicator, value) -> str:
+    """美化输出值"""
     # 用于格式化输出数值
     if "排名" in indicator and ("同比" in indicator or "环比" in indicator):
         rank_change = int(value)
@@ -94,7 +95,7 @@ class RankingOperator(BaseOperator):
             return f"查询指标数据出错{str(e)}"
 
         try:
-            # 获取当前机构的分行分组
+            # 获取当前机构的机构分组
             current_org_data = all_data_melted_df[
                 (
                     pd.to_datetime(all_data_melted_df["数据日期"]).dt.normalize()
@@ -107,7 +108,7 @@ class RankingOperator(BaseOperator):
             if current_org_data.empty:
                 return "查询指标数据出错"
 
-            branch_group = current_org_data["分行分组"].iloc[0]
+            branch_group = current_org_data["机构分组"].iloc[0]
 
             # 获取同分组所有机构数据
             group_data = all_data_melted_df[
@@ -115,7 +116,7 @@ class RankingOperator(BaseOperator):
                     pd.to_datetime(all_data_melted_df["数据日期"]).dt.normalize()
                     == target_date
                 )
-                & (all_data_melted_df["分行分组"] == branch_group)
+                & (all_data_melted_df["机构分组"] == branch_group)
                 & (all_data_melted_df["指标名称"] == indicator)
             ]
 
@@ -163,9 +164,8 @@ class RankingOperator(BaseOperator):
         except Exception as e:
             return f"查询指标数据出错 {str(e)}"
 
-
-# et means explain_trend
 def et(origianl_trend: str, rank: str) -> str:
+    """解释趋势含义"""
     # up 原始数据上升 down 原始数据下降
     # DESC 降序排序 越大越好 ASC 升序排序 越小越好 如 排名
     if origianl_trend == "up" and rank == "DESC":

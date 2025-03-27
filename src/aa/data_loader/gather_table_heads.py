@@ -16,7 +16,7 @@ def gather_table_heads():
 
         # 遍历每个file_name
         for _, row in sheet_df.iterrows():
-            file_name = f"{row['file_name']}.xlsx"
+            file_name = f"{row['file_name']}"
             start_row = row['start_row']
             end_row = row['end_row']
 

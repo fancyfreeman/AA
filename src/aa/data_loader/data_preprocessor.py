@@ -1,17 +1,14 @@
 from pathlib import Path
+from typing import Dict
+import logging
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple
-import logging
 from aa.data_loader.base_loader import BaseDataLoader
 
-# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
 
 class DataPreprocessor(BaseDataLoader):
     """数据预处理模块，支持新旧两种配置格式"""
-
     def __init__(
         self,
         data_extraction_config_file = "config/data_extraction_config.xlsx",
@@ -25,30 +22,29 @@ class DataPreprocessor(BaseDataLoader):
         self.data_output_file = Path(data_output_dir) / "data_preprocessed.xlsx"
         self.data_output_file.parent.mkdir(parents=True, exist_ok=True)
 
+        self.data_config_df_dict = self._parse_config()
+
     def load(self, config: dict = None) -> dict:
         """主处理入口"""
         try:
-            # 尝试新版配置格式
-            try:
-                multi_config, single_config, gourps_config = self._parse_config()
-                df_dict = self.process_multi_sheets(multi_config, single_config)
-                self._save_output(df_dict, gourps_config)
-                return {
-                    "status": "success",
-                    "record_count": len(df_dict),
-                    "data_output_dir": str(self.data_output_dir),
-                }
-            except ValueError as e:
-                logger.info(f"尝试新版配置格式: {e}")
-
+            df_dict = self.process_multi_sheets()
+            self._save_output(df_dict)
+            return {
+                "status": "success",
+                "record_count": len(df_dict),
+                "data_output_dir": str(self.data_output_dir),
+            }
         except Exception as e:
-            logger.error(f"处理失败: {str(e)}")
+            logger.error("处理失败: %s", str(e))
             return {"status": "error", "message": str(e)}
 
-    def process_multi_sheets(
-        self, multi_config: pd.DataFrame, single_config: pd.DataFrame
-    ) -> Dict[str, pd.DataFrame]:
+    def process_multi_sheets(self) -> Dict[str, pd.DataFrame]:
         """处理多sheet配置，返回字典结构{multi_sheet_df: dataframe}"""
+        # 从data_config_df_dict取出要用的df
+        multi_config = self.data_config_df_dict["multi_sheet_df"]
+        single_config = self.data_config_df_dict["single_sheet_df"]
+
+        # 准备返回变量
         result_dict = {}
 
         # 1.先处理 type == "manual" 的配置
@@ -78,9 +74,9 @@ class DataPreprocessor(BaseDataLoader):
                 }
 
                 # 加载数据
-                file_path = self.raw_data_dir / f"{row['file_name']}.xlsx"
+                file_path = self.raw_data_dir / f"{row['file_name']}"
                 if not file_path.exists():
-                    logger.warning(f"文件不存在: {file_path}")
+                    logger.warning("文件不存在: %s", file_path)
                     continue
 
                 df = self._load_sheet_data(
@@ -104,11 +100,9 @@ class DataPreprocessor(BaseDataLoader):
                 # 直接读取配置字段
                 file_name = row['file_name']
                 sheet_name = row['sheet_name']
-                # start_row = row['start_row']
-                # end_row = row['end_row']
 
                 # 构建文件路径
-                file_path = self.raw_data_dir / f"{file_name}.xlsx"
+                file_path = self.raw_data_dir / f"{file_name}"
 
                 if not file_path.exists():
                     logger.warning("文件不存在: %s", file_path)
@@ -120,7 +114,7 @@ class DataPreprocessor(BaseDataLoader):
                     sheet_name=sheet_name
                 )
 
-                df = self.clean_org_column(df)
+                df = self._clean_org_column(df)
 
                 # 存储结果
                 result_dict["ALL_DT_"+sheet_name] = df
@@ -153,32 +147,42 @@ class DataPreprocessor(BaseDataLoader):
                 nrows=end_row - start_row + 1,
             )
 
-            # 从文件名解析数据日期（格式：月报YYYY-MM-DD.xlsx）
-            date_str = file_path.stem.replace("月报", "")
+            # 从文件名解析数据日期（格式：XXXYYYY-MM-DD.xlsx XXX可以是任意字符，文件必须以YYYY-MM-DD结尾，必须按次格式，否则无法识别数据日期）
+            # date_str = file_path.stem.replace("月报", "")
+            date_part = file_path.stem.split(".")[0][-10:]
             df.columns = list(col_mapping.keys())
-            df["数据日期"] = pd.to_datetime(date_str, format="%Y-%m-%d")
+            df["数据日期"] = pd.to_datetime(date_part, format="%Y-%m-%d")
             # 使用 pop() 方法移除 'A' 列
             a_column = df.pop("数据日期")
             # 将 'A' 列添加到 DataFrame 的第一列
             df.insert(0, "数据日期", a_column)
-            df = self.clean_org_column(df)
+            df = self._clean_org_column(df)
             return df
-            # if "机构名称" in df.columns:
-            #     df["机构名称"] = df["机构名称"].replace("全行合计", "全行")
-            #     df["机构名称"] = df["机构名称"].replace("分行端合计", "分行合计")
-            #     df["机构名称"] = df["机构名称"].replace("合计", "全行")
-            # return df
 
         except Exception as e:
-            logger.error(f"加载{file_path}失败: {str(e)}")
+            logger.error("加载{file_path}失败: %s", {str(e)})
             return pd.DataFrame()
 
-    def clean_org_column(self, df:pd.DataFrame) -> pd.DataFrame:
+    def _clean_org_column(self, df:pd.DataFrame) -> pd.DataFrame:
         """清洗机构名称字段"""
         if "机构名称" in df.columns:
-            df["机构名称"] = df["机构名称"].replace("全行合计", "全行")
-            df["机构名称"] = df["机构名称"].replace("分行端合计", "分行合计")
-            df["机构名称"] = df["机构名称"].replace("合计", "全行")
+            # 机构名映射替换逻辑
+            org_mapping_df = self.data_config_df_dict.get("机构名替换")
+
+            if org_mapping_df is not None \
+                and "原机构名称" in org_mapping_df.columns \
+                and "新机构名称" in org_mapping_df.columns:
+
+                replace_dict = dict(zip(
+                    org_mapping_df["原机构名称"], 
+                    org_mapping_df["新机构名称"]
+                ))
+                df["机构名称"] = df["机构名称"].replace(replace_dict)
+
+                # 记录未匹配项（替换后仍存在的旧名称）
+                unmatched = df[df["机构名称"].isin(replace_dict.keys())]
+                if not unmatched.empty:
+                    logger.warning("发现%s条未成功替换的机构名称", len(unmatched))
         return df
     def _col_to_index(self, col_letter: str) -> int:
         """可以识别字母索引"""
@@ -190,7 +194,7 @@ class DataPreprocessor(BaseDataLoader):
             num += (ord(c) - ord("A") + 1) * (26**i)
         return num
 
-    def _parse_config(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def _parse_config(self) -> dict:
         """解析新版配置文件"""
         multi_df = pd.read_excel(
             self.data_extraction_config_file, sheet_name="multi_sheet_df"
@@ -199,7 +203,13 @@ class DataPreprocessor(BaseDataLoader):
             self.data_extraction_config_file, sheet_name="single_sheet_df"
         )
         groups_df = pd.read_excel(
-            self.data_extraction_config_file, sheet_name="分行分组"
+            self.data_extraction_config_file, sheet_name="机构分组"
+        )
+        filter_df = pd.read_excel(
+            self.data_extraction_config_file, sheet_name="过滤机构"
+        )
+        replacement_df = pd.read_excel(
+            self.data_extraction_config_file, sheet_name="机构名替换"
         )
 
         # 验证必要字段
@@ -212,20 +222,21 @@ class DataPreprocessor(BaseDataLoader):
             "end_row",
         ]
         required_single = ["single_sheet_df", "field", "column_index", "type", "dtype"]
-        required_groups = ["分行分组", "机构名称"]
+        required_groups = ["机构分组", "机构名称"]
 
         if not all(col in multi_df.columns for col in required_multi):
-            raise ValueError("新版配置缺少必要multi_sheet字段")
+            raise ValueError("配置缺少必要multi_sheet字段")
         if not all(col in single_df.columns for col in required_single):
-            raise ValueError("新版配置缺少必要single_sheet字段")
+            raise ValueError("配置缺少必要single_sheet字段")
         if not all(col in groups_df.columns for col in required_groups):
-            raise ValueError("新版配置缺少必要分行分组页字段")
-        return multi_df, single_df, groups_df
+            raise ValueError("配置缺少必要机构分组页字段")
+        return {"multi_sheet_df":multi_df,"single_sheet_df":single_df,"机构分组":groups_df,"过滤机构":filter_df,"机构名替换":replacement_df}
 
-    def _save_output(self, data_dict: dict, groups_config: pd.DataFrame):
+    def _save_output(self, data_dict: dict):
         """保存结果到Excel"""
         # pylint: disable=abstract-class-instantiated
         # 使用openpyxl引擎时ExcelWriter需要忽略抽象类实例化警告
+        groups_config = self.data_config_df_dict["机构分组"]
         with pd.ExcelWriter(self.data_output_file, engine="openpyxl", mode="w") as writer:  # type: ignore[abstract]
             # 保存原始各sheet数据
             for sheet_name, df in data_dict.items():
@@ -262,7 +273,7 @@ class DataPreprocessor(BaseDataLoader):
                 merged_df = merged_df.loc[:, ~merged_df.columns.str.endswith("_DROP")]
 
                 # 调整列顺序
-                base_columns = ["数据日期", "分行分组", "机构名称"]
+                base_columns = ["数据日期", "机构分组", "机构名称"]
                 other_columns = [
                     col for col in merged_df.columns if col not in base_columns
                 ]
@@ -272,7 +283,7 @@ class DataPreprocessor(BaseDataLoader):
                 merged_df.to_excel(writer, sheet_name="ALL_DATA", index=False)
 
                 # 转换窄表格式
-                id_vars = ["数据日期", "分行分组", "机构名称"]
+                id_vars = ["数据日期", "机构分组", "机构名称"]
                 measure_columns = [
                     col for col in merged_df.columns if col not in id_vars
                 ]
@@ -286,13 +297,13 @@ class DataPreprocessor(BaseDataLoader):
 
                 # 按日期和机构名称排序
                 final_df = melted_df.sort_values(
-                    ["数据日期", "分行分组", "机构名称", "指标名称"]
+                    ["数据日期", "机构分组", "机构名称", "指标名称"]
                 ).reset_index(drop=True)
 
                 # 保存合并结果
                 final_df.to_excel(writer, sheet_name="ALL_DATA_MELTED", index=False)
 
-    def derive_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _derive_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
         """指标衍生函数占位实现
         Args:
             df: 需要衍生指标的数据框
@@ -324,6 +335,6 @@ class DataPreprocessor(BaseDataLoader):
 
             df["C"] = c_values
         except Exception as e:
-            logger.error(f"指标衍生失败: {str(e)}")
+            logger.error("指标衍生失败: %s", str(e))
 
         return df

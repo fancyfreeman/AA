@@ -1,80 +1,81 @@
-# Automated Analysis (AA)
+# 自动化商业数据分析工具（Automated business data Analysis tool 简称AA）
 
-## 项目概述
-商业银行业务指标自动化分析系统，通过配置文件驱动实现：
-- 数据自动加载
-- 指标自动化分析
-- 分析结果自动生成
+## 项目简介
+自动化商业数据分析工具（Automated business data Analysis tool 简称AA）是一款通用的商业数据分析报告生成工具，适合用于对企业总部或者分支机构各项业务指标的变动进行监测分析，工具支持：
+- 支持灵活接入业务指标数据，灵活适配手工报表或者标准数据表；
+- 支持灵活配置业务分析报告模板，通过多种指标监测算子，对指标变动进行监测；
+- 支持分析报告生成；
+- 应用扩展：用户可以将生成报告提交给Deepseek，让其对分析报告进行总结提炼，总结亮点不足，形成报告解读。
 
-## 功能特性
-- 📁 配置驱动：通过YAML配置文件定义数据源、分析规则和输出格式
-- 🧩 模块化设计：支持扩展多种数据加载器、分析器和报告生成器
-- 📊 灵活分析：支持自定义业务指标和计算规则
-- 📈 多格式输出：生成HTML、PDF等多种格式分析报告
+AA工具具有灵活、自动化的特点，结合AI更可以实现报告的智能解读，将大大提高商业数据分析的效率，具体体现在：
+- 数据处理自动化，提高数据抽取、清洗、整合的效率；
+- 指标解读自动化，提高对指标变动、解读的效率，释放人力；
+- 分析结果智能化，与AI结合后，提高业务分析的质量和效率；
 
-## 目录结构
-```
-.
-├── config/               # 配置文件
-│   └── config.yaml       # 主配置文件
-├── data/                 # 数据文件存储
-├── docs/                 # 项目文档
-├── examples/             # 示例配置和数据
-├── src/                  # 源代码
-│   └── aa/               # 主包
-│       ├── core/         # 核心流程控制
-│       ├── data_loader/  # 数据加载模块
-│       ├── analyzers/    # 数据分析模块
-│       ├── report_generators/ # 报告生成模块
-│       └── utils/        # 工具函数
-├── tests/                # 单元测试
-├── venv/                 # Python虚拟环境
-├── requirements.txt      # 依赖清单
-└── README.md             # 项目文档
-```
+## 工具使用流程
+1. 数据预处理
+   1. 数据预处理配置
+   2. 数据预处理
+2. 生成指标监测报告
+   1. 指标监测报告模板配置
+   2. 指标监测报告生成
+3. 指标监测报告解读（可选）
+   1. 将指标监测报告提交给AI，通过提示词，让AI解读分析报告，提炼分析结论
 
 ## 快速开始
+### 安装
+```Shell
+# 1.从github下载AA
+git clone https://github.com/fancyfreeman/AA.git
 
-### 前置要求
-- Python 3.9+
-- pip
+# 2.安装python，检查python，要求使用 python 3.10+
+python -V
+Python 3.13.2
 
-### 安装依赖
-```bash
-source venv/bin/activate
-pip install -r requirements.txt
+# 3.创建python虚拟环境
+cd AA                     # 进入工具目录
+python -m venv .venv      # 创建虚拟环境 .venv
+source .venv/bin/activate # 激活虚拟环境 如需取消激活虚拟环境 执行 deactivate
+
+# 4.安装依赖包
+
+# 
+
+
+```
+### 运行（以使用样例数据为例进行说明）
+```Shell
+cd AA                     # 进入工具目录
+python ./src/main.py -C 1
+
+
+
 ```
 
-### 配置说明
-编辑 `config/config.yaml`:
-```yaml
-data_source:
-  type: csv
-  path: data/input.csv
-
-analysis:
-  metrics:
-    - loan_balance
-    - deposit_growth_rate
-  timeframe: monthly
-
-output:
-  format: html
-  path: reports/
+## 使用说明
+### 目录结构
 ```
-
-### 运行流程
-```python
-from aa.core import AnalysisPipeline
-
-pipeline = AnalysisPipeline()
-pipeline.run()
+.
+├── config/                               # 配置文件
+│   └── data_extraction_config.xlsx       # 数据预处理配置文件
+│   └── report_config.yaml                # 分析报告模板配置文件
+├── data/                                 # 数据文件夹
+│   └── raw/                              # 原始数据文件夹
+│   └── processed/                        # 预处理数据文件夹
+├── reports/                              # 分析报告文件夹
+├── src/                                  # 源代码
+│   └── aa/                               # 主包
+│   └── main.py                           # 主程序入口
+├── tests/                                # 测试文件夹
+├── requirements.txt                      # 依赖清单
+└── README.md                             # 项目文档
 ```
+### 数据预处理
 
-## 开发指南
-1. 扩展数据加载器：继承 `BaseDataLoader`
-2. 实现分析规则：继承 `BaseAnalyzer`
-3. 添加报告生成器：继承 `BaseReportGenerator`
+### 生成指标监测报告
+
+### 指标监测报告解读（需要AI支持，如DeepSeek-R1）
+
 
 ## 许可证
 MIT License
