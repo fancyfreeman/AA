@@ -6,4 +6,3 @@ class BaseReportGenerator(ABC):
     @abstractmethod
     def generate(self, analysis_results):
         """Generate reports from analysis results."""
-        pass
