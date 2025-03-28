@@ -182,8 +182,8 @@ class ReportGenerator(BaseReportGenerator):
                         'format': 'A'
                     }
 
-                    text_A = f"- {handler_class.handle(config, self.all_data_df, self.all_data_metled_df)}"
-                    output.append(text_A)
+                    text_a = f"- {handler_class.handle(config, self.all_data_df, self.all_data_metled_df)}"
+                    output.append(text_a)
 
                     if operator_type == "组内排名":
                         config = {
@@ -192,9 +192,13 @@ class ReportGenerator(BaseReportGenerator):
                             'format': 'B'
                         }
 
-                        text_B = f"{handler_class.handle(config, self.all_data_df, self.all_data_metled_df)}"
+                        text_b = f"{handler_class.handle(config, self.all_data_df, self.all_data_metled_df)}"
                         # 要插入的数据
-                        new_data = {"维度":current_level_title, "指标名称": indicator["name"], "组内排名": text_B}
+                        new_data = {
+                            "维度": current_level_title,
+                            "指标名称": indicator["name"],
+                            "组内排名": text_b,
+                        }
                         # 获取当前 DataFrame 的长度作为新行的索引
                         new_index = len(indicator_rank_df)
                         indicator_rank_df.loc[new_index] = new_data
