@@ -1,7 +1,7 @@
-import pandas as pd
 from typing import Any
 from pathlib import Path
 import re
+import pandas as pd
 from aa.report_generators.base_generator import BaseReportGenerator
 from aa.utils.config_loader import load_config
 from aa.report_generators.operators.default_operators import (
@@ -23,8 +23,9 @@ current_level_title = ""
 class ReportGenerator(BaseReportGenerator):
     """配置驱动的分析报告生成器"""
 
-    def __init__(self, config_path: str, data_path: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    # def __init__(self, config_path: str, data_path: str, *args, **kwargs):
+    def __init__(self, config_path: str, data_path: str):
+        super().__init__()
         self.config = load_config(config_path)
         try:
             self.all_data_df = pd.read_excel(data_path, sheet_name="ALL_DATA")
@@ -50,6 +51,8 @@ class ReportGenerator(BaseReportGenerator):
             org_name_list = self.config["head"]["org_name"].split()
             for _ in org_name_list:
                 report_content = []
+                global indicator_rank_df
+                indicator_rank_df = indicator_rank_df.drop(indicator_rank_df.index)
                 self.config["head"]["org_name"] = _
                 report_content.append(self._process_head(self.config['head']))
 

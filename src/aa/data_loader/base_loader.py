@@ -8,4 +8,4 @@ class BaseDataLoader(ABC):
     @abstractmethod
     def load(self, config: dict):
         """Load data from configured source."""
-        pass
+

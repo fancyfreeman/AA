@@ -1,12 +1,15 @@
 .pytest_cache/
 .venv/
 .vscode/
-data/
+his/
 reports/
 **/__pycache__/
 *.py[cod]
 *.xlsx
 *.xls
+!config/report_config_example.yaml
+!config/data_extraction_config_example.xlsx
+!data/raw/*example*.xlsx
 .env
 tmp.md
 .DS_Store

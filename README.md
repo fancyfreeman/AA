@@ -46,10 +46,7 @@ source .venv/bin/activate # 激活虚拟环境 如需取消激活虚拟环境 �
 ### 运行（以使用样例数据为例进行说明）
 ```Shell
 cd AA                     # 进入工具目录
-python ./src/main.py -C 1
-
-
-
+python ./src/main.py -T 1
 ```
 
 ## 使用说明
