@@ -2,7 +2,7 @@
 .venv/
 .vscode/
 his/
-reports/
+reports/ 
 **/__pycache__/
 *.py[cod]
 *.xlsx
@@ -13,5 +13,6 @@ reports/
 .env
 tmp.md
 .DS_Store
+*[全行|分行]*.*
 
 
