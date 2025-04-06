@@ -1,11 +1,58 @@
+"""
+默认操作符模块
+
+该模块包含了一系列用于生成报告的默认操作符类，包括:
+- 当期值操作符
+- 排名操作符 
+- 趋势操作符
+- 完成率操作符
+- 同比操作符
+- 环比操作符
+
+每个操作符都继承自BaseOperator基类，实现了特定的数据处理和格式化逻辑。
+"""
+
+import logging
+from typing import Union
 import pandas as pd
 from aa.report_generators.operators.base_operator import BaseOperator
 
-# 全局变量 升序排名指标关键字
-asc_ordered_keywords = ["不良率", "成本率", "同业排名", "排名"]
+logger = logging.getLogger(__name__)
 
-# 全局变量 百分比指标关键字
-percentage_keywords = ["率", "占比", "定价", "比例"]
+# 全局常量使用大写
+ASC_ORDERED_KEYWORDS = [
+    "不良率",
+    "成本率",
+    "同业排名",
+    "排名",
+    "零售综合考评等级",
+    "退货率",
+    "成本",
+    "库存量（件）"
+]
+PERCENTAGE_KEYWORDS = ["率", "占比", "定价", "比例"]
+
+# 使用更具描述性的函数名
+def format_indicator_value(indicator: str, value: Union[float, int]) -> str:
+    """
+    根据指标类型格式化输出值
+    
+    Args:
+        indicator: 指标名称
+        value: 指标值
+    
+    Returns:
+        格式化后的指标值字符串
+    """
+    if "排名" in indicator and ("同比" in indicator or "环比" in indicator):
+        rank_change = int(value)
+        if rank_change == 0:
+            return "排名位次不变"
+        return f"排名位次{'上升' if value < 0 else '下降'}{abs(int(value)):d}位"
+    
+    # 其余格式化逻辑...
+    
+    return f"{value:.1f}"  # 默认格式
 
 
 def pp(indicator, value) -> str:
@@ -30,16 +77,59 @@ def pp(indicator, value) -> str:
     ):
         percentage = value * 100
         res = f"{percentage:.2f}个百分点"
-    elif any(keyword in indicator for keyword in percentage_keywords):
+    elif any(keyword in indicator for keyword in PERCENTAGE_KEYWORDS):
         res = f"{value:.2%}"
     elif "客户数" in indicator:
         res = f"{int(value)}"
+    elif "零售综合考评等级" in indicator:
+        mapping = {1: 'A', 2: 'B', 3: 'C'}
+        res = mapping.get(value)
     else:
         res = f"{value:.1f}"
     return res
 
 class CurrentValueOperator(BaseOperator):
     """处理当期值操作符"""
+
+    @classmethod
+    def handle(
+        cls, config: dict, all_data_df: pd.DataFrame, all_data_melted_df: pd.DataFrame
+    ) -> str:
+        # 获取查询参数
+        try:
+            target_date = pd.to_datetime(config["data_dt_rule"]).normalize()
+            org = config["org_name"]
+            indicator = config["indicator"]
+        except KeyError as e:
+            return f"查询指标数据出错{str(e)}"
+
+        # 执行数据查询
+        try:
+            filtered = all_data_melted_df[
+                (
+                    pd.to_datetime(all_data_melted_df["数据日期"]).dt.normalize()
+                    == target_date
+                )
+                & (all_data_melted_df["机构名称"] == org)
+                & (all_data_melted_df["指标名称"] == indicator)
+            ]
+
+            # 检查查询结果有效性
+            if len(filtered) == 0:
+                return "查询指标数据出错，记录数为0"
+
+            values = filtered["指标值"].dropna().unique()
+            if len(values) != 1:
+                return "查询指标数据出错，记录数不为1"
+
+            return f"当期值：{pp(indicator,values[0])}"
+
+        except Exception as e:
+            return f"查询指标数据出错{str(e)}"
+
+
+class CurrentValueOperatorWithLatestDataDt(BaseOperator):
+    """处理当期值操作符，取最新数据日期，适用于获取数据更新不及时的指标"""
 
     @classmethod
     def handle(
@@ -55,6 +145,11 @@ class CurrentValueOperator(BaseOperator):
 
         # 执行数据查询
         try:
+            selected_indicator_df = all_data_melted_df[
+                (all_data_melted_df["机构名称"] == org)
+                & (all_data_melted_df["指标名称"] == indicator)
+            ]
+            target_date = selected_indicator_df["数据日期"].max()
             filtered = all_data_melted_df[
                 (
                     pd.to_datetime(all_data_melted_df["数据日期"]).dt.normalize()
@@ -128,7 +223,7 @@ class RankingOperator(BaseOperator):
 
             # 检查 indicator 是否包含列表中的关键词
             ascending_sort = any(
-                keyword in indicator for keyword in asc_ordered_keywords
+                keyword in indicator for keyword in ASC_ORDERED_KEYWORDS
             )
 
             sorted_df = dedup_data.sort_values(by="指标值", ascending=ascending_sort)
@@ -241,7 +336,7 @@ class TrendOperator(BaseOperator):
             indicator_value = f"近3月指标值为：{pp(indicator,v1)} {pp(indicator,v2)} {pp(indicator,v3)}"
 
             # 检查 indicator 是否包含列表中的关键词
-            if any(keyword in indicator for keyword in asc_ordered_keywords):
+            if any(keyword in indicator for keyword in ASC_ORDERED_KEYWORDS):
                 rank = "ASC"
             else:
                 rank = "DESC"

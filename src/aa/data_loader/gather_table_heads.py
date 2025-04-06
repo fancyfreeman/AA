@@ -1,5 +1,13 @@
+"""用于从Excel文件中提取表头信息的模块。
+
+该模块提供了从多个Excel文件中提取表头信息的功能，
+并将提取的表头信息汇总到一个新的Excel文件中。
+"""
+import logging
 import pandas as pd
 from openpyxl import load_workbook
+
+logger = logging.getLogger(__name__)
 
 def gather_table_heads():
     # 读取配置文件

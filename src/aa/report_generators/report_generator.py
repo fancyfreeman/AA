@@ -1,3 +1,13 @@
+"""配置驱动的报告生成器模块
+
+该模块提供了一个基于配置文件的报告生成器实现，用于生成分析报告。
+主要功能包括:
+- 从配置文件和数据文件加载数据
+- 生成报告的标题、正文等内容
+- 支持多种指标计算和展示方式
+"""
+
+import logging
 from typing import Any
 from pathlib import Path
 import re
@@ -6,6 +16,7 @@ from aa.report_generators.base_generator import BaseReportGenerator
 from aa.utils.config_loader import load_config
 from aa.report_generators.operators.default_operators import (
     CurrentValueOperator,
+    CurrentValueOperatorWithLatestDataDt,
     RankingOperator,
     TrendOperator,
     CompletionRateOperator,
@@ -14,11 +25,7 @@ from aa.report_generators.operators.default_operators import (
 )
 
 
-# 创建空的 DataFrame，指定列名和数据类型
-indicator_rank_df = pd.DataFrame(columns=["维度", "指标名称", "组内排名"], dtype="string")
-
-# 当前一级标题
-current_level_title = ""
+logger = logging.getLogger(__name__)
 
 class ReportGenerator(BaseReportGenerator):
     """配置驱动的分析报告生成器"""
@@ -26,6 +33,13 @@ class ReportGenerator(BaseReportGenerator):
     # def __init__(self, config_path: str, data_path: str, *args, **kwargs):
     def __init__(self, config_path: str, data_path: str):
         super().__init__()
+
+        # 创建空的 DataFrame，指定列名和数据类型
+        self.indicator_rank_df = pd.DataFrame(columns=["维度", "指标名称", "组内排名"], dtype="string")
+
+        # 当前一级标题
+        self.current_level_title = ""
+
         self.config = load_config(config_path)
         try:
             self.all_data_df = pd.read_excel(data_path, sheet_name="ALL_DATA")
@@ -51,8 +65,8 @@ class ReportGenerator(BaseReportGenerator):
             org_name_list = self.config["head"]["org_name"].split()
             for _ in org_name_list:
                 report_content = []
-                global indicator_rank_df
-                indicator_rank_df = indicator_rank_df.drop(indicator_rank_df.index)
+                # global indicator_rank_df
+                self.indicator_rank_df = self.indicator_rank_df.drop(self.indicator_rank_df.index)
                 self.config["head"]["org_name"] = _
                 report_content.append(self._process_head(self.config['head']))
 
@@ -88,7 +102,8 @@ class ReportGenerator(BaseReportGenerator):
         header = []
         v1 = v2 = v3 = ""
         if 'title' in head:
-            suffix = "分行" if "全行" not in head["org_name"] else "全行"
+            pass
+            # suffix = "分行" if "全行" not in head["org_name"] else "全行"
             # header.append(f"# {head['org_name']}{suffix}{head['title']}")
         if 'data_dt' in head:
             v1 = f"【数据日期】{head['data_dt']}"
@@ -111,8 +126,8 @@ class ReportGenerator(BaseReportGenerator):
             if 'section_title' in section:
                 content.append(f"{'#' * (level+1)} {section['section_title']}\n")
                 if level == 1:
-                    global current_level_title
-                    current_level_title = section['section_title']
+                    # global current_level_title
+                    self.current_level_title = section['section_title']
             # 处理普通内容
             if 'content' in section:
                 content.append(section['content'] + "\n")
@@ -132,19 +147,19 @@ class ReportGenerator(BaseReportGenerator):
         return '\n'.join(content)
 
     def _process_indicator_rank(self) -> str:
-        global indicator_rank_df
+        # global indicator_rank_df
 
-        if indicator_rank_df.empty:
+        if self.indicator_rank_df.empty:
             return ""
 
         output = []
         # 按维度字段分组处理
-        for dimension in indicator_rank_df['维度'].unique():
+        for dimension in self.indicator_rank_df['维度'].unique():
             # 添加小标题
             dimension_sub = re.sub(r"[\d\s]", "", dimension)
             output.append(f"#### {dimension_sub}\n")
             # 过滤当前维度的数据
-            df_filtered = indicator_rank_df[indicator_rank_df['维度'] == dimension].copy()
+            df_filtered = self.indicator_rank_df[self.indicator_rank_df['维度'] == dimension].copy()
             # df_filtered["指标名称"] = df_filtered["指标名称"].str[:30].str.ljust(30).str.replace(' ', '&nbsp;')
             # 生成表格
             output.append(
@@ -160,15 +175,31 @@ class ReportGenerator(BaseReportGenerator):
         output = []
         operator_handlers = {
             "当期值": CurrentValueOperator,
+            "当期值_最新数据日期": CurrentValueOperatorWithLatestDataDt,
             "组内排名": RankingOperator,
             "近期趋势": TrendOperator,
             "年度计划完成率": CompletionRateOperator,
             "同比": YearOverYearOperator,
-            "环比": MonthOverMonthOperator
+            "环比": MonthOverMonthOperator,
         }
 
         for indicator in indicators:
-            note = " " + indicator["note"] if 'note' in indicator else ""
+            note = "" + indicator["note"] if 'note' in indicator else ""
+
+            # 默认用head里的data_dt
+            data_dt_rule = self.config["head"]["data_dt"]
+            org = self.config["head"]["org_name"]
+            indicator_name = indicator["name"]
+
+            filtered_indicator_df = self.all_data_metled_df[
+                (self.all_data_metled_df["机构名称"] == org)
+                & (self.all_data_metled_df["指标名称"] == indicator_name)
+            ]
+            max_date = filtered_indicator_df["数据日期"].max().strftime("%Y-%m-%d")
+
+            if "data_dt_rule" in indicator:
+                data_dt_rule =  max_date
+
             output.append(f"**{indicator['name']}{note}**")
 
             for operator_config in indicator.get('operators', []):
@@ -180,31 +211,34 @@ class ReportGenerator(BaseReportGenerator):
                     # 构造配置字典（示例实现）
                     # config = {'value': 'XX'}
                     config = {
-                        **self.config.get('head', {}),
-                        'indicator': indicator['name'],
-                        'format': 'A'
+                        **self.config.get("head", {}),
+                        "indicator": indicator["name"],
+                        "data_dt_rule": data_dt_rule,
+                        "format": "A",
                     }
 
+                    # 处理算子
                     text_a = f"- {handler_class.handle(config, self.all_data_df, self.all_data_metled_df)}"
                     output.append(text_a)
 
                     if operator_type == "组内排名":
                         config = {
-                            **self.config.get('head', {}),
-                            'indicator': indicator['name'],
-                            'format': 'B'
+                            **self.config.get("head", {}),
+                            "indicator": indicator["name"],
+                            "data_dt_rule": data_dt_rule,
+                            "format": "B",
                         }
 
                         text_b = f"{handler_class.handle(config, self.all_data_df, self.all_data_metled_df)}"
                         # 要插入的数据
                         new_data = {
-                            "维度": current_level_title,
+                            "维度": self.current_level_title,
                             "指标名称": indicator["name"],
                             "组内排名": text_b,
                         }
                         # 获取当前 DataFrame 的长度作为新行的索引
-                        new_index = len(indicator_rank_df)
-                        indicator_rank_df.loc[new_index] = new_data
+                        new_index = len(self.indicator_rank_df)
+                        self.indicator_rank_df.loc[new_index] = new_data
 
                 else:
                     output.append(f"- 未知操作符: {operator_type}")
