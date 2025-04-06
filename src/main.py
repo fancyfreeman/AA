@@ -42,7 +42,7 @@ def main():
         help="数据预处理配置文件路径",
     )
     args = parser.parse_args()
-    
+
     # 使用常量定义路径
     DATA_OUTPUT_FILE = "data/processed/data_preprocessed.xlsx"
     report_config_file = Path(args.report_config_file)
@@ -63,7 +63,14 @@ def main():
             if not data_path.exists():
                 logger.error(f"预处理数据不存在：{data_path}")
                 return 1
-            handle_report_generation(report_config_file, data_path)
+            if not data_extraction_config_file.exists():
+                logger.error(f"数据预处理配置文件不存在：{data_extraction_config_file}")
+                return 1
+            handle_report_generation(
+                data_extraction_config_file, 
+                report_config_file,
+                data_path
+            )
 
     return 0
 
@@ -79,9 +86,13 @@ def handle_data_preprocessing(data_extraction_config_file: Path):
 
 
 @handle_errors
-def handle_report_generation(report_config_file: Path, data_output_file: Path):
+def handle_report_generation(data_extraction_config_file: Path, report_config_file: Path, data_output_file: Path):
     """执行报告生成任务"""
-    generator = ReportGenerator(str(report_config_file), str(data_output_file))
+    generator = ReportGenerator(
+        data_extraction_config_file=str(data_extraction_config_file),
+        report_config_file=str(report_config_file),
+        data_output_file=str(data_output_file) # 中间数据预处理后的数据文件
+    )
     report = generator.generate({})
     logger.info("报告生成完成：%s", report)
 

@@ -19,7 +19,7 @@ from aa.report_generators.operators.base_operator import BaseOperator
 
 logger = logging.getLogger(__name__)
 
-# 全局常量使用大写
+# 默认值，将在初始化时被替换
 ASC_ORDERED_KEYWORDS = [
     "不良率",
     "成本率",
@@ -32,28 +32,21 @@ ASC_ORDERED_KEYWORDS = [
 ]
 PERCENTAGE_KEYWORDS = ["率", "占比", "定价", "比例"]
 
-# 使用更具描述性的函数名
-def format_indicator_value(indicator: str, value: Union[float, int]) -> str:
+# 用于更新关键词列表的函数
+def update_keywords(asc_ordered_keywords=None, percentage_keywords=None):
     """
-    根据指标类型格式化输出值
-    
-    Args:
-        indicator: 指标名称
-        value: 指标值
-    
-    Returns:
-        格式化后的指标值字符串
-    """
-    if "排名" in indicator and ("同比" in indicator or "环比" in indicator):
-        rank_change = int(value)
-        if rank_change == 0:
-            return "排名位次不变"
-        return f"排名位次{'上升' if value < 0 else '下降'}{abs(int(value)):d}位"
-    
-    # 其余格式化逻辑...
-    
-    return f"{value:.1f}"  # 默认格式
+    更新模块中使用的关键词列表
 
+    Args:
+        asc_ordered_keywords: 升序排序关键词列表
+        percentage_keywords: 百分比关键词列表
+    """
+    global ASC_ORDERED_KEYWORDS, PERCENTAGE_KEYWORDS
+    if (asc_ordered_keywords is not None) and (percentage_keywords is not None):
+        ASC_ORDERED_KEYWORDS = asc_ordered_keywords
+        PERCENTAGE_KEYWORDS = percentage_keywords
+        logger.info(f"已更新ASC_ORDERED_KEYWORDS: {ASC_ORDERED_KEYWORDS}")
+        logger.info(f"已更新PERCENTAGE_KEYWORDS: {PERCENTAGE_KEYWORDS}")
 
 def pp(indicator, value) -> str:
     """美化输出值"""

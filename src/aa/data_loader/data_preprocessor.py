@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import logging
 from aa.data_loader.base_loader import BaseDataLoader
+from aa.utils.config_parser import parse_data_extraction_config
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class DataPreprocessor(BaseDataLoader):
         self.data_output_file = self.data_output_dir / "data_preprocessed.xlsx"
         self.data_output_dir.mkdir(parents=True, exist_ok=True)
 
-        self.data_config_df_dict = self._parse_config()
+        self.data_config_df_dict = parse_data_extraction_config(self.data_extraction_config_file)
 
     def load(self, config: dict = None) -> dict:
         """主处理入口"""
@@ -201,44 +202,6 @@ class DataPreprocessor(BaseDataLoader):
         for i, c in enumerate(reversed(s.upper())):  # 处理大小写并反向遍历字符
             num += (ord(c) - ord("A") + 1) * (26**i)
         return num
-
-    def _parse_config(self) -> dict:
-        """解析新版配置文件"""
-        multi_df = pd.read_excel(
-            self.data_extraction_config_file, sheet_name="multi_sheet_df"
-        )
-        single_df = pd.read_excel(
-            self.data_extraction_config_file, sheet_name="single_sheet_df"
-        )
-        groups_df = pd.read_excel(
-            self.data_extraction_config_file, sheet_name="机构分组"
-        )
-        filter_df = pd.read_excel(
-            self.data_extraction_config_file, sheet_name="过滤机构"
-        )
-        replacement_df = pd.read_excel(
-            self.data_extraction_config_file, sheet_name="机构名替换"
-        )
-
-        # 验证必要字段
-        required_multi = [
-            "multi_sheet_df",
-            "single_sheet_df",
-            "file_name",
-            "sheet_name",
-            "start_row",
-            "end_row",
-        ]
-        required_single = ["single_sheet_df", "field", "column_index", "type", "dtype"]
-        required_groups = ["机构分组", "机构名称"]
-
-        if not all(col in multi_df.columns for col in required_multi):
-            raise ValueError("配置缺少必要multi_sheet字段")
-        if not all(col in single_df.columns for col in required_single):
-            raise ValueError("配置缺少必要single_sheet字段")
-        if not all(col in groups_df.columns for col in required_groups):
-            raise ValueError("配置缺少必要机构分组页字段")
-        return {"multi_sheet_df":multi_df,"single_sheet_df":single_df,"机构分组":groups_df,"过滤机构":filter_df,"机构名替换":replacement_df}
 
     def _save_output(self, data_dict: dict):
         """保存结果到Excel"""

@@ -14,6 +14,7 @@ import re
 import pandas as pd
 from aa.report_generators.base_generator import BaseReportGenerator
 from aa.utils.config_loader import load_config
+from aa.utils.config_parser import parse_data_extraction_config
 from aa.report_generators.operators.default_operators import (
     CurrentValueOperator,
     CurrentValueOperatorWithLatestDataDt,
@@ -30,9 +31,24 @@ logger = logging.getLogger(__name__)
 class ReportGenerator(BaseReportGenerator):
     """配置驱动的分析报告生成器"""
 
-    # def __init__(self, config_path: str, data_path: str, *args, **kwargs):
-    def __init__(self, config_path: str, data_path: str):
+    def __init__(
+        self,
+        report_config_file: [str, Path] = "config/report_config_零售业_分店.yaml",
+        data_output_file: [str, Path] = "data/processed/data_preprocessed.xlsx",
+        data_extraction_config_file: [str, Path] = "config/data_extraction_config_样例_零售.xlsx"
+    ):
         super().__init__()
+        self.data_extraction_config_file = Path(data_extraction_config_file)
+        self.data_config_df_dict = parse_data_extraction_config(self.data_extraction_config_file)
+
+        # 更新default_operators模块中的关键词列表
+        from aa.report_generators.operators import default_operators
+        if ("ASC_ORDERED_KEYWORDS" in self.data_config_df_dict) and (
+            "PERCENTAGE_KEYWORDS" in self.data_config_df_dict
+        ):
+            asc_keywords = self.data_config_df_dict['ASC_ORDERED_KEYWORDS']['关键词'].tolist()
+            percentage_keywords = self.data_config_df_dict['PERCENTAGE_KEYWORDS']['关键词'].tolist()
+            default_operators.update_keywords(asc_keywords,percentage_keywords)
 
         # 创建空的 DataFrame，指定列名和数据类型
         self.indicator_rank_df = pd.DataFrame(columns=["维度", "指标名称", "组内排名"], dtype="string")
@@ -40,11 +56,11 @@ class ReportGenerator(BaseReportGenerator):
         # 当前一级标题
         self.current_level_title = ""
 
-        self.config = load_config(config_path)
+        self.config = load_config(report_config_file)
         try:
-            self.all_data_df = pd.read_excel(data_path, sheet_name="ALL_DATA")
+            self.all_data_df = pd.read_excel(data_output_file, sheet_name="ALL_DATA")
             self.all_data_metled_df = pd.read_excel(
-                data_path, sheet_name="ALL_DATA_MELTED"
+                data_output_file, sheet_name="ALL_DATA_MELTED"
             )
         except FileNotFoundError as e:
             raise RuntimeError(f"数据文件未找到: {e.filename}") from e
