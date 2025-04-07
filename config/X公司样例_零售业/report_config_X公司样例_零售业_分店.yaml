@@ -1,0 +1,118 @@
+# 分析报告的主体结构
+head:
+  title: "X公司门店销售经营分析报告"
+  data_dt: "2024-12-31"
+  org_name: "上海分店 杭州分店 南京分店 广州分店 深圳分店 厦门分店"
+  author: "XX事业部"
+
+sections:
+  # - section_title: "0 引言"
+  #   content: ""
+  - section_title: "1 经营全景监测（核心结果指标）"
+    sections:
+      - section_title: "1.1 销售规模健康度"
+        indicators:
+          - name: "销售额（万元）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+          - name: "销售量（件）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+      - section_title: "1.2 盈利质量防火墙"
+        indicators:
+          - name: "毛利率（%）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+  - section_title: "2 消费行为监测（市场响应指标）"
+    sections:
+      - section_title: "2.1 价格弹性敏感度"
+        indicators:
+          - name: "客单价（元）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+      - section_title: "2.2 客户结构健康度"
+        indicators:
+          - name: "会员消费占比（%）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+          - name: "新客户数"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+  - section_title: "3 运营效率监测（过程管理指标）"
+    sections:
+      - section_title: "3.1 库存周转效能"
+        indicators:
+          - name: "库存量（件）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+      - section_title: "3.2 促销资源效率"
+        indicators:
+          - name: "促销活动天数"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+  - section_title: "4 质量风险监测（负向修正指标）"
+    sections:
+      - section_title: "4.1 供应链风险敞口"
+        indicators:
+          - name: "退货率（%）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+      - section_title: "4.2 成本侵蚀预警"
+        indicators:
+          - name: "成本（万元）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近期趋势: XX"
+              - "同比: XX"
+              - "环比: XX"
+  - section_title: "附录"
+    sections:
+      - section_title: "主要指标组内排名"
+        indicator_rank: ""

@@ -57,7 +57,7 @@ python ./src/main.py -T 1
 .
 ├── config/                               # 配置文件
 │   └── data_extraction_config.xlsx       # 数据预处理配置文件
-│   └── report_config.yaml                # 分析报告模板配置文件
+│   └── report_config.yaml                # 分析报告模板模板文件
 ├── data/                                 # 数据文件夹
 │   └── raw/                              # 原始数据文件夹
 │   └── processed/                        # 预处理数据文件夹
@@ -65,13 +65,19 @@ python ./src/main.py -T 1
 ├── src/                                  # 源代码
 │   └── aa/                               # 主包
 │   └── main.py                           # 主程序入口
-├── tests/                                # 测试文件夹
 ├── requirements.txt                      # 依赖清单
 └── README.md                             # 项目文档
 ```
+数据命名规范（建议）
+config/ 该目录存放数据抽取配置文件和分析报告模板模板文件
+data/raw 该目录存放原始excel数据
+如 data_extraction_config_X公司样例_零售业.xlsx
+
+
 ### 数据预处理
 #### 数据预处理配置
 （介绍配置文件内容）
+
 
 ### 生成指标监测报告
 
