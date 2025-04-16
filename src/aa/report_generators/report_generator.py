@@ -203,6 +203,7 @@ class ReportGenerator(BaseReportGenerator):
             note = "" + indicator["note"] if 'note' in indicator else ""
 
             # 默认用head里的data_dt
+            data_dt = self.config["head"]["data_dt"]
             data_dt_rule = self.config["head"]["data_dt"]
             org = self.config["head"]["org_name"]
             indicator_name = indicator["name"]
@@ -216,7 +217,11 @@ class ReportGenerator(BaseReportGenerator):
             if "data_dt_rule" in indicator:
                 data_dt_rule =  max_date
 
-            output.append(f"**{indicator['name']}{note}**")
+            if data_dt_rule < data_dt:
+                data_dt_remark = f" 注：由于数据时效性问题，该指标的数据日期为：{data_dt_rule}"
+            else:
+                data_dt_remark = ""
+            output.append(f"**{indicator['name']}{note}{data_dt_remark}**")
 
             for operator_config in indicator.get('operators', []):
                 # 解析操作符类型和配置

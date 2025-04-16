@@ -51,7 +51,8 @@ class DataPreprocessor(BaseDataLoader):
     def process_multi_sheets(self) -> Dict[str, pd.DataFrame]:
         """处理多sheet配置，返回字典结构{multi_sheet_df: dataframe}"""
         # 从data_config_df_dict取出要用的df
-        multi_config = self.data_config_df_dict["multi_sheet_df"]
+        _ = self.data_config_df_dict["multi_sheet_df"]
+        multi_config = _[_["switch"] == "on"]
         single_config = self.data_config_df_dict["single_sheet_df"]
 
         # 准备返回变量
@@ -59,6 +60,7 @@ class DataPreprocessor(BaseDataLoader):
 
         # 1.先处理 type == "manual" 的配置
         manual_multi_sheet_df = multi_config[multi_config["type"] == "manual"]
+
         # 将manual_multi_sheet_df按照multi_sheet_df分组，然后处理每个分组
         for group_name, group in manual_multi_sheet_df.groupby(
             "multi_sheet_df", sort=False
