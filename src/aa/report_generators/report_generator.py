@@ -17,10 +17,8 @@ from aa.utils.config_loader import load_config
 from aa.utils.config_parser import parse_data_extraction_config
 from aa.report_generators.operators.default_operators import (
     CurrentValueOperator,
-    CurrentValueOperatorWithLatestDataDt,
     RankingOperator,
     TrendOperator,
-    CompletionRateOperator,
     YearOverYearOperator,
     MonthOverMonthOperator
 )
@@ -191,10 +189,8 @@ class ReportGenerator(BaseReportGenerator):
         output = []
         operator_handlers = {
             "当期值": CurrentValueOperator,
-            "当期值_最新数据日期": CurrentValueOperatorWithLatestDataDt,
             "组内排名": RankingOperator,
             "近期趋势": TrendOperator,
-            "年度计划完成率": CompletionRateOperator,
             "同比": YearOverYearOperator,
             "环比": MonthOverMonthOperator,
         }

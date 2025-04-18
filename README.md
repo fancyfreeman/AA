@@ -1,5 +1,5 @@
 # AA（Automated data Analysis tool）——自动化数据分析工具
-
+![[02 Attachments/intro 1.jpg|850]]
 ## 1.项目简介
 数据分析师的是”重脑力“工作者！数据采集、数据解读、得出结论，每个步骤都消耗着数据分析师大量时间和精力。其实，每次分析大量的工作都是重复的，因为每个行业基本上都有自己的经营分析逻辑，数据分析师每次都套用这套逻辑，检查业务指标的变动，最后选择业务发展中的亮点与不足，形成分析报告。如果将这一过程进行归纳总结，利用工具形成自动化的流程，将大大提升数据分析工作的效率。
 
@@ -24,7 +24,8 @@ kanban
 ### 安装 (提供windows macOS 两个平台的安装指引 )
 #### Windows用户适用
 ````Shell
-
+windows下pip安装依赖有问题
+缺少c编译环境，调查pip install numpy的过程
 ````
 #### MacOS用户适用
 ```Shell
@@ -40,7 +41,7 @@ cd AA                     # 进入工具目录
 python -m venv .venv      # 创建虚拟环境 .venv
 source .venv/bin/activate # 激活虚拟环境 如需取消激活虚拟环境 执行 deactivate
 
-# 4.安装依赖包
+# 4.安装依赖包 
 cd AA
 pip install -r requirements.txt
 
@@ -210,7 +211,8 @@ sections部分定义了报告的主体。如下图所示，示例中的模板包
 	- operators：配置针对该指标的算子。
 ![[02 Attachments/Posted_Image_20250414175659.png|650]]
 ##### 彩蛋：展示各机构的主要指标组内排名
-
+我们通常会关注企业内各经营机构的组内排名，为了方便对经营机构各项指标的排名情况进行概览，只需要进行以下配置，就会在报告的附录中增加主要指标的排名情况，非常直观。
+![[02 Attachments/Posted_Image_20250418140557.png|650]]
 
 #### （2）执行指标监测报告任务
 至此，我们已经完成了指标监测模板的配置工作，接下来就可以执行指标监测报告生成任务，命令如下：
@@ -227,10 +229,20 @@ python src/main.py -T 2 \
 指标监测报告位于reports目录下，如下图所示：
 ![[02 Attachments/Posted_Image_20250415182113.png|669]]
 你可以用任何支持markdown语法的工具（如Obsidian）进行查看、编辑、导出其他格式等操作，示例如下：
-![[02 Attachments/Posted_Image_20250415182431.png|562]]
+![[02 Attachments/Posted_Image_20250418151139.png|650]]
+
+### 第3步：指标监测报告解读
+这里给出用Deepseek-R1，对报告进行提炼总结的示例。
+
+![[02 Attachments/Posted_Image_20250418151501.png|650]]
+#### 提示词
+读取此文档，按照章节顺序，提炼这个机构业务经营中的亮点和不足。
+
+提交分析报告，可以用Obsidian将markdown报告转为pdf或者word格式提交。
 
 
-### 第3步：指标监测报告解读（需要AI支持，如DeepSeek-R1）
+
 
 ## 许可证
 MIT License
+

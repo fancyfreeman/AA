@@ -94,7 +94,7 @@ class CurrentValueOperator(BaseOperator):
             org = config["org_name"]
             indicator = config["indicator"]
         except KeyError as e:
-            return f"查询指标数据出错{str(e)}"
+            return f"计算当期值时：查询指标数据出错{str(e)}"
 
         # 执行数据查询
         try:
@@ -109,61 +109,61 @@ class CurrentValueOperator(BaseOperator):
 
             # 检查查询结果有效性
             if len(filtered) == 0:
-                return "查询指标数据出错，记录数为0"
+                return "计算当期值时：查询指标数据出错，记录数为0，请检查数据是否完整"
 
             values = filtered["指标值"].dropna().unique()
             if len(values) != 1:
-                return "查询指标数据出错，记录数不为1"
+                return "计算当期值时：查询指标数据出错，记录数不为1，请检查数据是否重复"
 
             return f"当期值：{pp(indicator,values[0])}"
 
         except Exception as e:
-            return f"查询指标数据出错{str(e)}"
+            return f"计算当期值时：查询指标数据出错{str(e)}"
 
 
-class CurrentValueOperatorWithLatestDataDt(BaseOperator):
-    """处理当期值操作符，取最新数据日期，适用于获取数据更新不及时的指标"""
+# class CurrentValueOperatorWithLatestDataDt(BaseOperator):
+#     """处理当期值操作符，取最新数据日期，适用于获取数据更新不及时的指标"""
 
-    @classmethod
-    def handle(
-        cls, config: dict, all_data_df: pd.DataFrame, all_data_melted_df: pd.DataFrame
-    ) -> str:
-        # 获取查询参数
-        try:
-            target_date = pd.to_datetime(config["data_dt"]).normalize()
-            org = config["org_name"]
-            indicator = config["indicator"]
-        except KeyError as e:
-            return f"查询指标数据出错{str(e)}"
+#     @classmethod
+#     def handle(
+#         cls, config: dict, all_data_df: pd.DataFrame, all_data_melted_df: pd.DataFrame
+#     ) -> str:
+#         # 获取查询参数
+#         try:
+#             target_date = pd.to_datetime(config["data_dt"]).normalize()
+#             org = config["org_name"]
+#             indicator = config["indicator"]
+#         except KeyError as e:
+#             return f"查询指标数据出错{str(e)}"
 
-        # 执行数据查询
-        try:
-            selected_indicator_df = all_data_melted_df[
-                (all_data_melted_df["机构名称"] == org)
-                & (all_data_melted_df["指标名称"] == indicator)
-            ]
-            target_date = selected_indicator_df["数据日期"].max()
-            filtered = all_data_melted_df[
-                (
-                    pd.to_datetime(all_data_melted_df["数据日期"]).dt.normalize()
-                    == target_date
-                )
-                & (all_data_melted_df["机构名称"] == org)
-                & (all_data_melted_df["指标名称"] == indicator)
-            ]
+#         # 执行数据查询
+#         try:
+#             selected_indicator_df = all_data_melted_df[
+#                 (all_data_melted_df["机构名称"] == org)
+#                 & (all_data_melted_df["指标名称"] == indicator)
+#             ]
+#             target_date = selected_indicator_df["数据日期"].max()
+#             filtered = all_data_melted_df[
+#                 (
+#                     pd.to_datetime(all_data_melted_df["数据日期"]).dt.normalize()
+#                     == target_date
+#                 )
+#                 & (all_data_melted_df["机构名称"] == org)
+#                 & (all_data_melted_df["指标名称"] == indicator)
+#             ]
 
-            # 检查查询结果有效性
-            if len(filtered) == 0:
-                return "查询指标数据出错，记录数为0"
+#             # 检查查询结果有效性
+#             if len(filtered) == 0:
+#                 return "查询指标数据出错，记录数为0"
 
-            values = filtered["指标值"].dropna().unique()
-            if len(values) != 1:
-                return "查询指标数据出错，记录数不为1"
+#             values = filtered["指标值"].dropna().unique()
+#             if len(values) != 1:
+#                 return "查询指标数据出错，记录数不为1"
 
-            return f"当期值：{pp(indicator,values[0])}"
+#             return f"当期值：{pp(indicator,values[0])}"
 
-        except Exception as e:
-            return f"查询指标数据出错{str(e)}"
+#         except Exception as e:
+#             return f"查询指标数据出错{str(e)}"
 
 
 class RankingOperator(BaseOperator):
@@ -180,7 +180,7 @@ class RankingOperator(BaseOperator):
             indicator = config["indicator"]
             format = config["format"] 
         except KeyError as e:
-            return f"查询指标数据出错{str(e)}"
+            return f"计算组内排名时：查询指标数据出错{str(e)}"
 
         try:
             # 获取当前机构的机构分组
@@ -194,7 +194,7 @@ class RankingOperator(BaseOperator):
             ]
 
             if current_org_data.empty:
-                return "查询指标数据出错"
+                return "计算组内排名时：查询指标数据出错，请检查数据是否完整"
 
             branch_group = current_org_data["机构分组"].iloc[0]
 
@@ -209,7 +209,7 @@ class RankingOperator(BaseOperator):
             ]
 
             if group_data.empty:
-                return "查询指标数据出错，分组数据为空"
+                return "计算组内排名时：查询指标数据出错，机构分组数据为空，请检查机构分组参数是否配置"
 
             # 去除重复机构数据（保留最后一个）
             dedup_data = group_data.drop_duplicates(subset=["机构名称"], keep="last")
@@ -232,7 +232,7 @@ class RankingOperator(BaseOperator):
             org_rank = sorted_df.loc[sorted_df["机构名称"] == org, "排名"].values
 
             if len(org_rank) == 0:
-                return "查询指标数据出错，记录数为0"
+                return "计算组内排名时：查询指标数据出错，记录数为0，请检查数据是否完整"
             # 生成组内分行排名详情
             rank_details = []
             for idx, row in sorted_df.iterrows():
@@ -250,7 +250,7 @@ class RankingOperator(BaseOperator):
                 )
 
         except Exception as e:
-            return f"查询指标数据出错 {str(e)}"
+            return f"计算组内排名时：查询指标数据出错 {str(e)}"
 
 def et(origianl_trend: str, rank: str) -> str:
     """解释趋势含义"""
@@ -282,7 +282,7 @@ class TrendOperator(BaseOperator):
             org = config["org_name"]
             indicator = config["indicator"]
         except KeyError as e:
-            return f"查询指标数据出错{str(e)}"
+            return f"计算近期趋势时：查询指标数据出错{str(e)}"
 
         try:
             # 生成需要查询的三个月范围（T-2、T-1、T）
@@ -299,7 +299,7 @@ class TrendOperator(BaseOperator):
 
             # 有效性检查基础数据
             if filtered.empty:
-                return "查询指标数据出错，数据集为空"
+                return "计算近期趋势时：查询指标数据出错，数据集为空"
 
             # 按日期排序后去重（保留每个月份最后一个记录）
             filtered = filtered.sort_values("数据日期")
@@ -308,7 +308,7 @@ class TrendOperator(BaseOperator):
             # 检查是否包含完整三个月数据
             existing_months = dedup_data["数据日期"].unique()
             if not all(m in existing_months for m in month_ends):
-                return "查询指标数据出错，数据日期不完整"
+                return "计算近期趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个月末的数据"
 
             # 按时间顺序提取指标值（T-2、T-1、T）
             trend_data = dedup_data.set_index("数据日期").loc[month_ends]
@@ -316,7 +316,7 @@ class TrendOperator(BaseOperator):
 
             # 最终有效性检查
             if len(values) != 3 or any(pd.isnull(values)):
-                return "查询指标数据出错，数据日期不完整"
+                return "计算近期趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个月末的数据"
 
             v1, v2, v3 = values
             # if "排名" in indicator:
@@ -353,17 +353,17 @@ class TrendOperator(BaseOperator):
                 return f"近期趋势：波动。{indicator_value}"
 
         except Exception as e:
-            return f"查询指标数据出错{str(e)}"
+            return f"计算近期趋势时：查询指标数据出错{str(e)}"
 
 
-class CompletionRateOperator(BaseOperator):
-    """处理完成率操作符"""
+# class CompletionRateOperator(BaseOperator):
+#     """处理完成率操作符"""
 
-    @classmethod
-    def handle(
-        cls, config: dict, all_data_df: pd.DataFrame, all_data_melted_df: pd.DataFrame
-    ) -> str:
-        return f"完成率：{config.get('rate', 'XX')}%（示例实现）"
+#     @classmethod
+#     def handle(
+#         cls, config: dict, all_data_df: pd.DataFrame, all_data_melted_df: pd.DataFrame
+#     ) -> str:
+#         return f"完成率：{config.get('rate', 'XX')}%（示例实现）"
 
 
 class YearOverYearOperator(BaseOperator):
@@ -379,7 +379,7 @@ class YearOverYearOperator(BaseOperator):
             org = config["org_name"]
             indicator = config["indicator"]
         except KeyError as e:
-            return f"查询指标数据基础参数出错{str(e)}"
+            return f"计算同比时：查询指标数据基础参数出错{str(e)}"
 
         try:
             # 计算去年同期日期
@@ -411,11 +411,11 @@ class YearOverYearOperator(BaseOperator):
                 [current_data, last_year_data], ["当前", "去年同期"]
             ):
                 if len(data) == 0:
-                    return f"查询指标数据出错，{period}数据记录数为0"
+                    return f"计算同比时：查询指标数据出错，{period}数据记录数为0，请检查数据是否完整"
 
                 values = data["指标值"].dropna().unique()
                 if len(values) != 1:
-                    return f"查询指标数据出错，{period}数据记录数不为1"
+                    return f"计算同比时：查询指标数据出错，{period}数据记录数不为1，请检查数据是否重复"
 
             # 提取数值
             current_value = current_data["指标值"].iloc[0]
@@ -435,7 +435,7 @@ class YearOverYearOperator(BaseOperator):
             return f"同比情况：同比变动 {tmp_str1}{tmp_str2}，去年同期：{pp(indicator,last_year_value)}"
 
         except Exception as e:
-            return f"查询指标数据出错：{str(e)}"
+            return f"计算同比时：查询指标数据出错：{str(e)}"
 
 
 class MonthOverMonthOperator(BaseOperator):
@@ -451,7 +451,7 @@ class MonthOverMonthOperator(BaseOperator):
             org = config["org_name"]
             indicator = config["indicator"]
         except KeyError as e:
-            return f"查询指标数据基础参数出错{str(e)}"
+            return f"计算环比时：查询指标数据基础参数出错{str(e)}"
 
         try:
             # 计算上月同期日期
@@ -483,11 +483,11 @@ class MonthOverMonthOperator(BaseOperator):
                 [current_data, last_month_data], ["当前", "上月同期"]
             ):
                 if len(data) == 0:
-                    return f"查询指标数据出错，{period}数据记录数为0"
+                    return f"计算环比时：查询指标数据出错，{period}数据记录数为0，请检查数据是否完整"
 
                 values = data["指标值"].dropna().unique()
                 if len(values) != 1:
-                    return f"查询指标数据出错，{period}数据记录数不为1"
+                    return f"计算环比时：查询指标数据出错，{period}数据记录数不为1，请检查数据是否重复"
 
             # 提取数值
             current_value = current_data["指标值"].iloc[0]
@@ -508,4 +508,4 @@ class MonthOverMonthOperator(BaseOperator):
             return f"环比情况：环比变动 {tmp_str1}{tmp_str2}，上月同期：{pp(indicator,last_month_value)}"
 
         except Exception as e:
-            return f"查询指标数据出错：{str(e)}"
+            return f"计算环比时：查询指标数据出错：{str(e)}"
