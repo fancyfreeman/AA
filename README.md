@@ -1,5 +1,6 @@
 # AA（Automated data Analysis tool）——自动化数据分析工具
 <img src="docs/images/intro1.jpg" style='width: 850px;' />
+
 ## 1.项目简介
 数据分析师的是”重脑力“工作者！数据采集、数据解读、得出结论，每个步骤都消耗着数据分析师大量时间和精力。其实，每次分析大量的工作都是重复的，因为每个行业基本上都有自己的经营分析逻辑，数据分析师每次都套用这套逻辑，检查业务指标的变动，最后选择业务发展中的亮点与不足，形成分析报告。如果将这一过程进行归纳总结，利用工具形成自动化的流程，将大大提升数据分析工作的效率。
 
@@ -93,7 +94,9 @@ python ./src/main.py -T 1
 ### 第1步：数据预处理
 #### （1）配置数据预处理
 在数据预处理配置文件中，一共可以配置7类信息，对应7个sheet：
+
 <img src="docs/images/Posted_Image_20250414135544.png" style='width: 877px;' />
+
 7类配置信息是：
 - multi_sheet_df 用于配置标准表
 - single_sheet_df 用于配置手工表，如没有手工表，可不配置
@@ -109,7 +112,6 @@ python ./src/main.py -T 1
 	- 销售额（万元）、销售量（件）等9个指标，来自IT部门开发的销售报表，数据可以从报表系统下载使用。
 		<img src="docs/images/Posted_Image_20250414143802.png" style='width: 571px;' />
 	- 各个门店的年营收计划值，是业务管理部门制定的，目前处于手工管理状态，以下是2024年各个门店的营收计划值，可用于计算计划完成率。
-
 		<img src="docs/images/Posted_Image_20250414144128.png" style='width: 403px;' />
 	- 营收数据来自财务部门提供的手工报表，每月通过Excel发布，表格格式不规范，存在合并单元格。
 		<img src="docs/images/Posted_Image_20250414144559.png" style='width: 584px;' />
@@ -122,7 +124,9 @@ python ./src/main.py -T 1
 ##### 1.配置标准数据（按需配置）
 标准表，指表格结构标准的数据表格，可以理解为从数据库中直接查询得到的表，只有一行表头，无单元格合并等特殊操作，对于这类数据，数据预处理过程中将直接将表头作为指标名称。
 标准表的配置非常简单，只需要在**data_extraction_config_X公司样例_零售业.xlsx**的multi_sheet_df页中配置，一张标准表对应一条记录，如下图所示。
+
 <img src="docs/images/Posted_Image_20250415180111.png" style='width: 714px;' />
+
 绿色字段为必填项目，其他为公式自动计算字段。
 file_name：填写存放标准数据的Excel文件。
 sheet_name：存放标准数据的Sheet名称。
@@ -133,24 +137,37 @@ switch：on表示该条配置生效，否则不生效。
 手工表是指在实际业务场景中，存在的手工制作的报表，这类报表表头往往比较复杂，程序无法直接识别，需要增加细节的配置信息才能保证数据抽取正确。
 在**data_extraction_config_X公司样例_零售业.xlsx**的multi_sheet_df页中配置2条记录，12月数据还未收集到，配置为未生效状态，11月数据已收集，配置为生效（on）状态，如下图所示：
 <img src="docs/images/Posted_Image_20250415180324.png" style='width: 710px;' />
+
 继续在single_sheet_df页中配置4条记录，表示要从2张手工报表中，抽取机构名称、营收2列数据，其中12月的数据由于multi_sheet_df对应的记录处于未生效状态，此处配置实际上不生效，如下图所示：
+
 <img src="docs/images/Posted_Image_20250415180626.png" style='width: 711px;' />
+
 ##### 3.配置机构分组
 在实际场景中，公司内部的经营机构会按照地域或者体量等划分为不同的分组，这时就会用到机构分组配置，如下图所示，将6家机构分为华东区和华南区2个分组：
+
 <img src="docs/images/Posted_Image_20250414160245.png" style='width: 287px;' />
+
 注：至少要有一个分组。
 ##### 4.配置过滤机构（可选）
 在实际场景中，报表中会包含一些我们不需要的行，这时我们可以用过滤机构进行过滤，如下图所示，根据配置预处理任务将会过滤机构名称为“分店合计”的数据：
+
 <img src="docs/images/Posted_Image_20250414160723.png" style='width: 291px;' />
+
 ##### 5.机构名替换（可选）
 有时一些机构的名称历史上发生过变化，但在历史数据中，依然保留着原来的机构名称，在数据预处理阶段，我们想统一显示为新的机构名称，如下图所示，将把所有的A门店替换为B门店：
+
 <img src="docs/images/Posted_Image_20250414160927.png" style='width: 295px;' />
+
 ##### 6.配置ASC_ORDERED_KEYWORDS升序排序指标关键词列表（可选）
 在分析不同机构间，同一指标的表现优劣时，需要对指标值进行排序，这里配置需要按照升序排列的指标关键词（指标值越小越好，如退货率，不良率、同业排名等），如下图所示：
+
 <img src="docs/images/Posted_Image_20250414161236.png" style='width: 398px;' />
+
 ##### 7.配置PERCENTAGE_KEYWORDS百分比指标关键词列表（可选）
 对于需要在报告中按照百分比展示的指标，将对应的关键词配置在这里，如下图所示：
+
 <img src="docs/images/Posted_Image_20250414162032.png" style='width: 485px;' />
+
 注：对于比例指标，建议原数据中以小数形式存放，例如10%，excel表格中存放0.1或者10%，但不要存放10。
 
 #### （2）执行数据预处理任务
@@ -164,26 +181,36 @@ python src/main.py -T 1 \
 --raw_data_dir data/raw/X公司样例_零售业
 ````
 运行结果如下：
+
 <img src="docs/images/Posted_Image_20250414163205.png" style='width: 982px;' />
+
 命令执行成功后，数据预处理的结果将位于data/processed/data_preprocessed.xlsx，打开此Excel文件，查看预处理后的数据。
 ##### 数据预处理结果
 前面的若干页对应每一个标准表或者手工表数据。
+
 <img src="docs/images/Posted_Image_20250414163643.png" style='width: 611px;' />
+
 后面的两个sheet是最终的数据预处理结果：
 ALL_DATA：是整合所有指标的宽表，主键是数据日期+机构名称，每一个指标对应一列。
+
 <img src="docs/images/Posted_Image_20250414170629.png" style='width: 655px;' />
+
 ALL_DATA_MELTED：是将ALL_DATA进行转置处理后，形成的窄表，主键是数据日期+机构名称+指标名称
+
 <img src="docs/images/Posted_Image_20250414170756.png" style='width: 300px;' />
+
 注：系统会自动根据X指标以及对应的X指标计划值，自动计算X指标的计划完成率和时序计划完成率。例如根据营收、营收计划值，得到营收计划完成率、营收时序计划完成率。
 ### 第2步：生成指标监测报告
 根据行业的经营逻辑，选取指标，配置形成指标监测模板，然后执行报告生成任务，得到指标监测报告。
 #### （1）配置指标监测报告模板
 指标监测模板的配置文件位于 config/X公司样例_零售业/report_config_X公司样例_零售业_分店.yaml，如下图所示：
 <img src="docs/images/Posted_Image_20250414171710.png" style='width: 650px;' />
+
 模板采用yaml语法进行定义，包括head和sections两部分，其中sections可以嵌套sections，下面针对各项配置进行详细说明。
 ##### head部分
 head用于定义模板的整体属性，如下图所示：
 <img src="docs/images/Posted_Image_20250414172808.png" style='width: 650px;' />
+
 4个属性分别是
 - title：分析报告的名称
 - data_dt：分析报告当期所对应的数据日期，比如以2024-12-31作为当期数据日期，当期值、同比、环比皆根据此日期进行计算。
@@ -192,6 +219,7 @@ head用于定义模板的整体属性，如下图所示：
 ##### sections部分
 sections部分定义了报告的主体。如下图所示，示例中的模板包含了5个部分，当然用户也可以定义一个引言部分， 介绍分析报告的整体逻辑，这里略去。
 <img src="docs/images/Posted_Image_20250414173116.png" style='width: 650px;' />
+
 ##### 配置指标监测内容
 算子概念：指标监测报告的核心内容是对指标进行监测。具体是通过算子（operator）实现的，目前支持的算子包括：
 
@@ -211,9 +239,11 @@ sections部分定义了报告的主体。如下图所示，示例中的模板包
 	- data_dt_rule：这是一个特殊属性，配置此属性表示如果data_dt的数据日期数据还不具备，则取最新的数据日期对应的数据。【这里有个bug，如果重跑数据的时候会导致数据有误】
 	- operators：配置针对该指标的算子。
 <img src="docs/images/Posted_Image_20250414175659.png" style='width: 650px;' />
+
 ##### 彩蛋：展示各机构的主要指标组内排名
 我们通常会关注企业内各经营机构的组内排名，为了方便对经营机构各项指标的排名情况进行概览，只需要进行以下配置，就会在报告的附录中增加主要指标的排名情况，非常直观。
 <img src="docs/images/Posted_Image_20250418140557.png" style='width: 650px;' />
+
 
 #### （2）执行指标监测报告任务
 至此，我们已经完成了指标监测模板的配置工作，接下来就可以执行指标监测报告生成任务，命令如下：
@@ -229,18 +259,23 @@ python src/main.py -T 2 \
 <img src="docs/images/Posted_Image_20250415181620.png" />
 指标监测报告位于reports目录下，如下图所示：
 <img src="docs/images/Posted_Image_20250415182113.png" style='width: 669px;' />
+
 你可以用任何支持markdown语法的工具（如Obsidian）进行查看、编辑、导出其他格式等操作，示例如下：
 <img src="docs/images/Posted_Image_20250418151139.png" style='width: 650px;' />
+
 
 ### 第3步：指标监测报告解读
 这里给出用Deepseek-R1，对报告进行提炼总结的示例。
 
 <img src="docs/images/Posted_Image_20250418151501.png" style='width: 650px;' />
+
 #### 提示词
 读取此文档，按照章节顺序，提炼这个机构业务经营中的亮点和不足。
 
-提交分析报告，可以用Obsidian将markdown报告转为pdf或者word格式提交。
-
+上传指标监测报告，可以用Obsidian将markdown报告转为pdf或者word格式提交。然后将AI的回答复制到Obsidian中。
+最后得到的解读结果样例见：
+[上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.md](reports/上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.md)
+[上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.pdf](reports/上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.pdf)
 
 
 
