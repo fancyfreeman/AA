@@ -112,6 +112,7 @@ python ./src/main.py -T 1
 	- 销售额（万元）、销售量（件）等9个指标，来自IT部门开发的销售报表，数据可以从报表系统下载使用。
 		<img src="docs/images/Posted_Image_20250414143802.png" style='width: 571px;' />
 	- 各个门店的年营收计划值，是业务管理部门制定的，目前处于手工管理状态，以下是2024年各个门店的营收计划值，可用于计算计划完成率。
+		
 		<img src="docs/images/Posted_Image_20250414144128.png" style='width: 403px;' />
 	- 营收数据来自财务部门提供的手工报表，每月通过Excel发布，表格格式不规范，存在合并单元格。
 		<img src="docs/images/Posted_Image_20250414144559.png" style='width: 584px;' />
