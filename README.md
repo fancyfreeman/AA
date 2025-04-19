@@ -275,8 +275,8 @@ python src/main.py -T 2 \
 
 上传指标监测报告，可以用Obsidian将markdown报告转为pdf或者word格式提交。然后将AI的回答复制到Obsidian中。
 最后得到的解读结果样例见：
-[上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.md](reports/上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.md)
-[上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.pdf](reports/上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.pdf)
+- [上海分店业务经营亮点与不足分析（按章节顺序）_generated_by_Deepseek.md](reports/上海分店业务经营亮点与不足分析（按章节顺序）_generated_by_Deepseek.md)
+- [上海分店业务经营亮点与不足分析（按章节顺序）_created by Deepseek.pdf](上海分店业务经营亮点与不足分析（按章节顺序）_generated_by_Deepseek.pdf)
 
 
 
