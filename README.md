@@ -83,6 +83,10 @@ python ./src/main.py -T 2
 ### 查看指标监测报告
 生成的markdown格式报告位于reports目录下，可用支持markdown格式的编辑器打开报告，推荐使用Obsidian，VS Code等工具。
 
+**（以下为项目的详细使用介绍）**
+
+---
+
 ## 3.项目的目录结构
 ```
 .                                                              
