@@ -25,35 +25,63 @@ kanban
 ### 安装 (提供windows macOS 两个平台的安装指引 )
 #### Windows用户适用
 ````Shell
-windows下pip安装依赖有问题
-缺少c编译环境，调查pip install numpy的过程
+# 1.下载项目
+# (1) 从github下载AA
+git clone https://github.com/fancyfreeman/AA.git
+# (2) 或者下载zip文件后本地解压缩 下载地址 https://github.com/fancyfreeman/AA/archive/refs/heads/main.zip
+
+# 2.安装python环境，如果用户对python环境安装不够熟悉，建议使用Anaconda安装，下面是安装示例
+# (1) 下载Anaconda并安装，下载地址 https://www.anaconda.com/download/success 
+
+# (2) 执行 Anaconda Prompt进入终端，检查Python版本，要求使用 python 3.10+ 以上版本
+(aa_env) C:\Users\fancy\Dev\AA>python -V
+Python 3.13.2
+
+# (3) 为AA项目创建一个虚拟conda虚拟环境
+conda create -n aa_env
+
+# (4) 激活虚拟环境
+conda activate aa_env
+
+# (5) 安装项目的依赖包
+conda install numpy openpyxl pandas PyYAML tabulate
 ````
 #### MacOS用户适用
 ```Shell
-# 1.从github下载AA
+# 1.下载项目
+# (1) 从github下载AA
 git clone https://github.com/fancyfreeman/AA.git
+# (2) 或者下载zip文件后本地解压缩 下载地址 https://github.com/fancyfreeman/AA/archive/refs/heads/main.zip
 
-# 2.安装python，检查python版本，要求使用 python 3.10+ 以上版本，下载地址 https://www.python.org/downloads/
+# 2.安装python环境
+# (1) 可以从Python官网安装，要求使用 python 3.10+ 以上版本，下载地址 https://www.python.org/downloads/
+
+# (2) 安装完成后，检查Python版本
 python -V
 Python 3.13.2
 
-# 3.创建python虚拟环境
-cd AA                     # 进入工具目录
+# (3) 创建python虚拟环境
+cd AA                     # 进入AA目录
 python -m venv .venv      # 创建虚拟环境 .venv
 source .venv/bin/activate # 激活虚拟环境 如需取消激活虚拟环境 执行 deactivate
 
-# 4.安装依赖包 
-cd AA
+# (4) 安装依赖包 
+cd AA                     # 进入AA目录
 pip install -r requirements.txt
-
 ```
 ### 运行（以使用样例数据为例进行说明）
 ```Shell
-cd AA
+cd AA                     # 进入AA目录
+
+# 1.执行项目示例的数据预处理任务
 python ./src/main.py -T 1
+
+# 3.执行项目示例的生成指标监测报告任务
+python ./src/main.py -T 2
+
 ```
 ### 查看指标监测报告
-用支持markdown格式的编辑器打开报告，推荐使用Obsidian，VS Code等工具
+生成的markdown格式报告位于reports目录下，可用支持markdown格式的编辑器打开报告，推荐使用Obsidian，VS Code等工具。
 
 ## 3.项目的目录结构
 ```
@@ -174,6 +202,15 @@ switch：on表示该条配置生效，否则不生效。
 #### （2）执行数据预处理任务
 至此，我们已经完成了所有的数据预处理配置工作，接下来就可以执行数据预处理任务，命令如下：
 ````Shell
+# Windows用户适用 
+conda activate aa_env     # 激活虚拟环境
+cd AA                     # 进入AA目录
+# 执行数据预处理任务，windows的cmd终端换行符号是 ^
+python src/main.py -T 1 ^
+--data_extraction_config_file config/X公司样例_零售业/data_extraction_config_X公司样例_零售业.xlsx ^
+--raw_data_dir data/raw/X公司样例_零售业
+
+# MacOS用户适用
 # 进入项目目录，激活python虚拟环境
 cd AA && source .venv/bin/activate
 # 执行数据预处理任务，1号任务为数据预处理任务，data_extraction_config_file指定数据预处理的配置文件，raw_data_dir指定存放原始数据的文件夹
@@ -249,6 +286,15 @@ sections部分定义了报告的主体。如下图所示，示例中的模板包
 #### （2）执行指标监测报告任务
 至此，我们已经完成了指标监测模板的配置工作，接下来就可以执行指标监测报告生成任务，命令如下：
 ````Shell
+# Windows用户适用 
+conda activate aa_env     # 激活虚拟环境
+cd AA                     # 进入AA目录
+# 执行数据预处理任务，windows的cmd终端换行符号是 ^
+python src/main.py -T 2 ^
+--data_extraction_config_file config/X公司样例_零售业/data_extraction_config_X公司样例_零售业.xlsx ^
+--report_config_file config/X公司样例_零售业/report_config_X公司样例_零售业_分店.yaml
+
+# MacOS用户适用
 # 进入项目目录，激活python虚拟环境
 cd AA && source .venv/bin/activate
 # 执行数据预处理任务，1号任务为数据预处理任务，data_extraction_config_file指定数据预处理的配置文件，raw_data_dir指定存放原始数据的文件夹
@@ -263,7 +309,6 @@ python src/main.py -T 2 \
 
 你可以用任何支持markdown语法的工具（如Obsidian）进行查看、编辑、导出其他格式等操作，示例如下：
 <img src="docs/images/Posted_Image_20250418151139.png" style='width: 650px;' />
-
 
 ### 第3步：指标监测报告解读
 这里给出用Deepseek-R1，对报告进行提炼总结的示例。
