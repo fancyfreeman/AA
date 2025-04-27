@@ -191,8 +191,8 @@ class ReportGenerator(BaseReportGenerator):
             "当期值": CurrentValueOperator,
             "组内排名": RankingOperator,
             "近期趋势": TrendOperator,
-            "同比": YearOverYearOperator,
-            "环比": MonthOverMonthOperator,
+            "年同比": YearOverYearOperator,
+            "月环比": MonthOverMonthOperator,
         }
 
         for indicator in indicators:

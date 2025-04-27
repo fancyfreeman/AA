@@ -379,7 +379,7 @@ class YearOverYearOperator(BaseOperator):
             org = config["org_name"]
             indicator = config["indicator"]
         except KeyError as e:
-            return f"计算同比时：查询指标数据基础参数出错{str(e)}"
+            return f"计算年同比时：查询指标数据基础参数出错{str(e)}"
 
         try:
             # 计算去年同期日期
@@ -411,11 +411,11 @@ class YearOverYearOperator(BaseOperator):
                 [current_data, last_year_data], ["当前", "去年同期"]
             ):
                 if len(data) == 0:
-                    return f"计算同比时：查询指标数据出错，{period}数据记录数为0，请检查数据是否完整"
+                    return f"计算年同比时：查询指标数据出错，{period}数据记录数为0，请检查数据是否完整"
 
                 values = data["指标值"].dropna().unique()
                 if len(values) != 1:
-                    return f"计算同比时：查询指标数据出错，{period}数据记录数不为1，请检查数据是否重复"
+                    return f"计算年同比时：查询指标数据出错，{period}数据记录数不为1，请检查数据是否重复"
 
             # 提取数值
             current_value = current_data["指标值"].iloc[0]
@@ -432,10 +432,10 @@ class YearOverYearOperator(BaseOperator):
             # tmp_str1 = f"同比排名 {pp(f"{indicator}_同比",-growth_amount)}" if "排名" in indicator else f"同比增长 {pp(f"{indicator}_同比",growth_amount)}"
             tmp_str1 = f"{pp(f"{indicator}_同比",growth_amount)}"
             tmp_str2 = "" if "排名" in indicator else f"，同比增幅 {growth_rate:.1f}%"
-            return f"同比情况：同比变动 {tmp_str1}{tmp_str2}，去年同期：{pp(indicator,last_year_value)}"
+            return f"年同比情况：同比变动 {tmp_str1}{tmp_str2}，去年同期：{pp(indicator,last_year_value)}"
 
         except Exception as e:
-            return f"计算同比时：查询指标数据出错：{str(e)}"
+            return f"计算年同比时：查询指标数据出错：{str(e)}"
 
 
 class MonthOverMonthOperator(BaseOperator):
@@ -451,7 +451,7 @@ class MonthOverMonthOperator(BaseOperator):
             org = config["org_name"]
             indicator = config["indicator"]
         except KeyError as e:
-            return f"计算环比时：查询指标数据基础参数出错{str(e)}"
+            return f"计算月环比时：查询指标数据基础参数出错{str(e)}"
 
         try:
             # 计算上月同期日期
@@ -483,11 +483,11 @@ class MonthOverMonthOperator(BaseOperator):
                 [current_data, last_month_data], ["当前", "上月同期"]
             ):
                 if len(data) == 0:
-                    return f"计算环比时：查询指标数据出错，{period}数据记录数为0，请检查数据是否完整"
+                    return f"计算月环比时：查询指标数据出错，{period}数据记录数为0，请检查数据是否完整"
 
                 values = data["指标值"].dropna().unique()
                 if len(values) != 1:
-                    return f"计算环比时：查询指标数据出错，{period}数据记录数不为1，请检查数据是否重复"
+                    return f"计算月环比时：查询指标数据出错，{period}数据记录数不为1，请检查数据是否重复"
 
             # 提取数值
             current_value = current_data["指标值"].iloc[0]
@@ -505,7 +505,7 @@ class MonthOverMonthOperator(BaseOperator):
 
             tmp_str1 = f"{pp(f"{indicator}_环比",growth_amount)}"
             tmp_str2 = "" if "排名" in indicator else f"，环比增幅 {growth_rate:.1f}%"
-            return f"环比情况：环比变动 {tmp_str1}{tmp_str2}，上月同期：{pp(indicator,last_month_value)}"
+            return f"月环比情况：环比变动 {tmp_str1}{tmp_str2}，上月同期：{pp(indicator,last_month_value)}"
 
         except Exception as e:
-            return f"计算环比时：查询指标数据出错：{str(e)}"
+            return f"计算月环比时：查询指标数据出错：{str(e)}"
