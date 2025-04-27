@@ -269,8 +269,9 @@ def et(origianl_trend: str, rank: str) -> str:
 def is_leap_year(year):
     return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
 
-class TrendOperator(BaseOperator):
-    """处理近期趋势操作符"""
+
+class TrendLast3MonthsOperator(BaseOperator):
+    """处理近3月趋势操作符"""
 
     @classmethod
     def handle(
@@ -282,7 +283,7 @@ class TrendOperator(BaseOperator):
             org = config["org_name"]
             indicator = config["indicator"]
         except KeyError as e:
-            return f"计算近期趋势时：查询指标数据出错{str(e)}"
+            return f"计算近3月趋势时：查询指标数据出错{str(e)}"
 
         try:
             # 生成需要查询的三个月范围（T-2、T-1、T）
@@ -299,7 +300,7 @@ class TrendOperator(BaseOperator):
 
             # 有效性检查基础数据
             if filtered.empty:
-                return "计算近期趋势时：查询指标数据出错，数据集为空"
+                return "计算近3月趋势时：查询指标数据出错，数据集为空"
 
             # 按日期排序后去重（保留每个月份最后一个记录）
             filtered = filtered.sort_values("数据日期")
@@ -308,7 +309,7 @@ class TrendOperator(BaseOperator):
             # 检查是否包含完整三个月数据
             existing_months = dedup_data["数据日期"].unique()
             if not all(m in existing_months for m in month_ends):
-                return "计算近期趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个月末的数据"
+                return "计算近3月趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个月末的数据"
 
             # 按时间顺序提取指标值（T-2、T-1、T）
             trend_data = dedup_data.set_index("数据日期").loc[month_ends]
@@ -316,7 +317,7 @@ class TrendOperator(BaseOperator):
 
             # 最终有效性检查
             if len(values) != 3 or any(pd.isnull(values)):
-                return "计算近期趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个月末的数据"
+                return "计算近3月趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个月末的数据"
 
             v1, v2, v3 = values
             # if "排名" in indicator:
@@ -337,23 +338,106 @@ class TrendOperator(BaseOperator):
             # 判断趋势类型
             if v1 < v2 < v3:
                 mean_of_trend = et("up", rank)
-                return f"近期趋势：连续2月{mean_of_trend}。{indicator_value}"
+                return f"近3月趋势：连续2月{mean_of_trend}。{indicator_value}"
             elif v1 > v2 > v3:
                 mean_of_trend = et("down", rank)
-                return f"近期趋势：连续2月{mean_of_trend}。{indicator_value}"
+                return f"近3月趋势：连续2月{mean_of_trend}。{indicator_value}"
             elif v1 <= v2 and v2 > v3:
                 mean_of_trend = et("down", rank)
-                return f"近期趋势：出现拐点，开始{mean_of_trend}。{indicator_value}"
+                return f"近3月趋势：出现拐点，开始{mean_of_trend}。{indicator_value}"
             elif v1 >= v2 and v2 < v3:
                 mean_of_trend = et("up", rank)
-                return f"近期趋势：出现拐点，开始{mean_of_trend}。{indicator_value}"
+                return f"近3月趋势：出现拐点，开始{mean_of_trend}。{indicator_value}"
             elif v1 == v2 and v2 == v3:
-                return f"近期趋势：持平。{indicator_value}"
+                return f"近3月趋势：持平。{indicator_value}"
             else:
-                return f"近期趋势：波动。{indicator_value}"
+                return f"近3月趋势：波动。{indicator_value}"
 
         except Exception as e:
-            return f"计算近期趋势时：查询指标数据出错{str(e)}"
+            return f"计算近3月趋势时：查询指标数据出错{str(e)}"
+
+
+class TrendLast3QuartersOperator(BaseOperator):
+    """处理近3季度趋势操作符"""
+
+    @classmethod
+    def handle(
+        cls, config: dict, all_data_df: pd.DataFrame, all_data_melted_df: pd.DataFrame
+    ) -> str:
+        try:
+            # 解析基础参数
+            target_date = pd.to_datetime(config["data_dt"]).normalize()
+            org = config["org_name"]
+            indicator = config["indicator"]
+        except KeyError as e:
+            return f"计算近3季度趋势时：查询指标数据出错{str(e)}"
+
+        try:
+            # 生成需要查询的三个季度范围（T-2、T-1、T）
+            # 计算当前季度末
+            current_quarter_end = target_date + pd.offsets.QuarterEnd(0)
+
+            # 生成三个季度的季末日期
+            quarters = [target_date - pd.DateOffset(months=x) for x in [6, 3, 0]]
+            quarter_ends = [date + pd.offsets.MonthEnd(0) for date in quarters]
+
+            # 过滤目标数据
+            filtered = all_data_melted_df[
+                (all_data_melted_df["机构名称"] == org)
+                & (all_data_melted_df["指标名称"] == indicator)
+                & (all_data_melted_df["数据日期"].isin(quarter_ends))
+            ]
+
+            # 有效性检查基础数据
+            if filtered.empty:
+                return "计算近3季度趋势时：查询指标数据出错，数据集为空"
+
+            # 按日期排序后去重（保留每个季度最后一个记录）
+            filtered = filtered.sort_values("数据日期")
+            dedup_data = filtered.drop_duplicates(subset=["数据日期"], keep="last")
+
+            # 检查是否包含完整三个季度数据
+            existing_quarters = dedup_data["数据日期"].unique()
+            if not all(q in existing_quarters for q in quarter_ends):
+                return "计算近3季度趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个季度末的数据"
+
+            # 按时间顺序提取指标值（T-2、T-1、T）
+            trend_data = dedup_data.set_index("数据日期").loc[quarter_ends]
+            values = trend_data["指标值"].tolist()
+
+            # 最终有效性检查
+            if len(values) != 3 or any(pd.isnull(values)):
+                return "计算近3季度趋势时：查询指标数据出错，数据日期不完整，数据应包含近3个季度末的数据"
+
+            v1, v2, v3 = values
+            indicator_value = f"近3季度指标值为：{pp(indicator,v1)} {pp(indicator,v2)} {pp(indicator,v3)}"
+
+            # 检查 indicator 是否包含列表中的关键词
+            if any(keyword in indicator for keyword in ASC_ORDERED_KEYWORDS):
+                rank = "ASC"
+            else:
+                rank = "DESC"
+
+            # 判断趋势类型
+            if v1 < v2 < v3:
+                mean_of_trend = et("up", rank)
+                return f"近3季度趋势：连续2季度{mean_of_trend}。{indicator_value}"
+            elif v1 > v2 > v3:
+                mean_of_trend = et("down", rank)
+                return f"近3季度趋势：连续2季度{mean_of_trend}。{indicator_value}"
+            elif v1 <= v2 and v2 > v3:
+                mean_of_trend = et("down", rank)
+                return f"近3季度趋势：出现拐点，开始{mean_of_trend}。{indicator_value}"
+            elif v1 >= v2 and v2 < v3:
+                mean_of_trend = et("up", rank)
+                return f"近3季度趋势：出现拐点，开始{mean_of_trend}。{indicator_value}"
+            elif v1 == v2 and v2 == v3:
+                return f"近3季度趋势：持平。{indicator_value}"
+            else:
+                return f"近3季度趋势：波动。{indicator_value}"
+
+        except Exception as e:
+            return f"计算近3季度趋势时：查询指标数据出错{str(e)}"
 
 
 # class CompletionRateOperator(BaseOperator):

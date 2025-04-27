@@ -17,7 +17,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
           - name: "销售量（件）"
@@ -25,7 +25,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
           - name: "营收"
@@ -34,7 +34,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
       - section_title: "1.2 盈利质量防火墙"
@@ -44,7 +44,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
   - section_title: "2 消费行为监测（市场响应指标）"
@@ -56,7 +56,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
       - section_title: "2.2 客户结构健康度"
@@ -66,7 +66,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
           - name: "新客户数"
@@ -74,7 +74,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
   - section_title: "3 运营效率监测（过程管理指标）"
@@ -86,7 +86,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
       - section_title: "3.2 促销资源效率"
@@ -96,7 +96,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
   - section_title: "4 质量风险监测（负向修正指标）"
@@ -108,7 +108,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
       - section_title: "4.2 成本侵蚀预警"
@@ -118,7 +118,7 @@ sections:
             operators:
               - "当期值: XX"
               - "组内排名: XX"
-              - "近期趋势: XX"
+              - "近3月趋势: XX"
               - "年同比: XX"
               - "月环比: XX"
   - section_title: "附录"
