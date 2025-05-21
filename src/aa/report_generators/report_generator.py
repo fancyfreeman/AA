@@ -20,6 +20,7 @@ from aa.report_generators.operators.default_operators import (
     RankingOperator,
     TrendLast3MonthsOperator,
     TrendLast3QuartersOperator,
+    TrendLast3YearsOperator,
     YearOverYearOperator,
     MonthOverMonthOperator,
 )
@@ -36,6 +37,9 @@ class ReportGenerator(BaseReportGenerator):
         data_output_file: [str, Path] = "data/processed/data_preprocessed.xlsx",
         data_extraction_config_file: [str, Path] = "config/data_extraction_config_样例_零售.xlsx"
     ):
+        logger.info(
+            "支持的算子包括：当期值, 组内排名, 近3月趋势, 近3季度趋势, 年同比, 月环比"
+        )
         super().__init__()
         self.data_extraction_config_file = Path(data_extraction_config_file)
         self.data_config_df_dict = parse_data_extraction_config(self.data_extraction_config_file)
@@ -115,7 +119,7 @@ class ReportGenerator(BaseReportGenerator):
     def _process_head(self, head: dict) -> str:
         """处理报告头部信息"""
         header = []
-        v1 = v2 = v3 = ""
+        v1 = v2 = v3 = v4= ""
         if 'title' in head:
             pass
             # suffix = "分行" if "全行" not in head["org_name"] else "全行"
@@ -126,10 +130,9 @@ class ReportGenerator(BaseReportGenerator):
             v2 = f"【机构名称】{head['org_name']}"
         if 'author' in head:
             v3 = f"【报告作者】{head['author']}"
-
-        header.append(
-            f"> [!INFO] {v1}        {v2}        {v3}"
-        )
+        if "desc" in head:
+            v4 = f"【说明】{head['desc']}"
+        header.append(f"> [!INFO] {v1}        {v2}        {v3}        {v4}")
         # header.append(f"---")
         return '\n'.join(header)
 
@@ -193,6 +196,7 @@ class ReportGenerator(BaseReportGenerator):
             "组内排名": RankingOperator,
             "近3月趋势": TrendLast3MonthsOperator,
             "近3季度趋势": TrendLast3QuartersOperator,
+            "近3年趋势": TrendLast3YearsOperator,
             "年同比": YearOverYearOperator,
             "月环比": MonthOverMonthOperator,
         }
@@ -200,25 +204,30 @@ class ReportGenerator(BaseReportGenerator):
         for indicator in indicators:
             note = "" + indicator["note"] if 'note' in indicator else ""
 
-            # 默认用head里的data_dt
+            # 默认用head里的data_dt, org, name
             data_dt = self.config["head"]["data_dt"]
             data_dt_rule = self.config["head"]["data_dt"]
             org = self.config["head"]["org_name"]
             indicator_name = indicator["name"]
 
+            # 初步用机构名称和指标过滤，
             filtered_indicator_df = self.all_data_metled_df[
                 (self.all_data_metled_df["机构名称"] == org)
                 & (self.all_data_metled_df["指标名称"] == indicator_name)
             ]
             max_date = filtered_indicator_df["数据日期"].max().strftime("%Y-%m-%d")
 
+            # 如果指标的属性中包含 data_dt_rule，说明由于时效性问题，需要取最新数据日期
+            data_dt_remark = ""
             if "data_dt_rule" in indicator:
-                data_dt_rule =  max_date
-
-            if data_dt_rule < data_dt:
-                data_dt_remark = f" 注：由于数据时效性问题，该指标的数据日期为：{data_dt_rule}"
-            else:
-                data_dt_remark = ""
+                # 如果 max_date < data_dt 说明需要应用data_dt_rule
+                if max_date < data_dt:
+                    data_dt_rule = max_date
+                    data_dt_remark = f" 注：该指标的数据日期为：{data_dt_rule}"
+                # data_dt_rule 取 data_dt的值，对后面的逻辑不产生实际影响，
+                else:
+                    data_dt_rule = data_dt
+                    data_dt_remark = ""
             output.append(f"**{indicator['name']}{note}{data_dt_remark}**")
 
             for operator_config in indicator.get('operators', []):

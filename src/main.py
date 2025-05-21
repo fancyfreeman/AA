@@ -28,7 +28,7 @@ def main():
         type=str,
         default="2",
         choices=["1", "2"],
-        help="1:准备数据 2:生成报告 默认执行2:生成报告任务",
+        help="1:准备数据 2:生成报告 默认执行2:生成报告任务 ",
     )
     parser.add_argument(
         "--report_config_file",
