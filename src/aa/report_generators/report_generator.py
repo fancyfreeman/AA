@@ -25,7 +25,6 @@ from aa.report_generators.operators.default_operators import (
     MonthOverMonthOperator,
 )
 
-
 logger = logging.getLogger(__name__)
 
 class ReportGenerator(BaseReportGenerator):
