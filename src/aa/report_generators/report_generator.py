@@ -130,8 +130,8 @@ class ReportGenerator(BaseReportGenerator):
         if 'author' in head:
             v3 = f"【报告作者】{head['author']}"
         if "desc" in head:
-            v4 = f"【说明】{head['desc']}"
-        header.append(f"> [!INFO] {v1}        {v2}        {v3}        {v4}")
+            v4 = f"注：{head['desc']}"
+        header.append(f"> [!INFO] {v1}        {v2}        {v3}        \n{v4}")
         # header.append(f"---")
         return '\n'.join(header)
 

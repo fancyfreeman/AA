@@ -243,22 +243,70 @@ ALL_DATA_MELTED：是将ALL_DATA进行转置处理后，形成的窄表，主键
 ### 第2步：生成指标监测报告
 根据行业的经营逻辑，选取指标，配置形成指标监测模板，然后执行报告生成任务，得到指标监测报告。
 #### （1）配置指标监测报告模板
-指标监测模板的配置文件位于 config/X公司样例_零售业/report_config_X公司样例_零售业_分店.yaml，如下图所示：
-<img src="docs/images/Posted_Image_20250414171710.png" style='width: 650px;' />
+指标监测模板的配置文件位于 config/X公司样例_零售业/report_config_X公司样例_零售业_分店.yaml，如所示：
+```yaml
+# 分析报告的主体结构
+head:
+  title: "X公司门店指标监测报告"
+  data_dt: "2024-12-31"
+  org_name: "上海分店 杭州分店 南京分店 广州分店 深圳分店 厦门分店"
+  author: "XX事业部"
+  desc: "🔴正面 🟢负面 ➖中性 部分指标由于时效性原因取最新数据"
+sections:
+  # - section_title: "0 引言"
+  #   content: ""
+  - section_title: "1 经营全景监测（核心结果指标）"
+    sections:
+      - section_title: "1.1 销售规模健康度"
+        indicators:
+          - name: "销售额（万元）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近3月趋势: XX"
+              - "年同比: XX"
+              - "月环比: XX"
+(以下省略)
+```
 
 模板采用yaml语法进行定义，包括head和sections两部分，其中sections可以嵌套sections，下面针对各项配置进行详细说明。
 ##### head部分
 head用于定义模板的整体属性，如下图所示：
-<img src="docs/images/Posted_Image_20250414172808.png" style='width: 650px;' />
+```yaml
+head:
+  title: "X公司门店指标监测报告"
+  data_dt: "2024-12-31"
+  org_name: "上海分店 杭州分店 南京分店 广州分店 深圳分店 厦门分店"
+  author: "XX事业部"
+  desc: "🔴正面 🟢负面 ➖中性 部分指标由于时效性原因取最新数据"
+```
 
 4个属性分别是
 - title：分析报告的名称
 - data_dt：分析报告当期所对应的数据日期，比如以2024-12-31作为当期数据日期，当期值、同比、环比皆根据此日期进行计算。
 - org_name：需要生成报告的机构名称，多个机构用空格分割。
 - author：定义出具报告的部门。
+- desc：报告的说明信息。
 ##### sections部分
 sections部分定义了报告的主体。如下图所示，示例中的模板包含了5个部分，当然用户也可以定义一个引言部分， 介绍分析报告的整体逻辑，这里略去。
-<img src="docs/images/Posted_Image_20250414173116.png" style='width: 650px;' />
+```yaml
+sections:
+  # - section_title: "0 引言"
+  #   content: ""
+  - section_title: "1 经营全景监测（核心结果指标）"
+  (省略)
+  - section_title: "2 消费行为监测（市场响应指标）"
+  (省略)
+  - section_title: "3 运营效率监测（过程管理指标）"
+  (省略)
+  - section_title: "4 质量风险监测（负向修正指标）"
+  (省略)
+  - section_title: "4 质量风险监测（负向修正指标）"
+  (省略)
+  - section_title: "附录"
+  (省略)
+```
 
 ##### 配置指标监测内容
 算子概念：指标监测报告的核心内容是对指标进行监测。具体是通过算子（operator）实现的，目前支持的算子包括：
@@ -278,7 +326,37 @@ sections部分定义了报告的主体。如下图所示，示例中的模板包
 	- note：放指标的备注信息，展示在指标名称之后，比如原指标名称中没有单位，这里就可以用来配置单位。
 	- data_dt_rule：这是一个特殊属性，配置此属性表示如果data_dt的数据日期数据还不具备，则取最新的数据日期对应的数据。【这里有个bug，如果重跑数据的时候会导致数据有误】
 	- operators：配置针对该指标的算子。
-<img src="docs/images/Posted_Image_20250414175659.png" style='width: 650px;' />
+```yaml
+	  (省略)
+      - section_title: "1.1 销售规模健康度"
+        indicators:
+          - name: "销售额（万元）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近3月趋势: XX"
+              - "年同比: XX"
+              - "月环比: XX"
+          - name: "销售量（件）"
+            note: ""
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近3月趋势: XX"
+              - "年同比: XX"
+              - "月环比: XX"
+          - name: "营收"
+            note: "（万元）" #该信息在报告中，展示在指标名称之后，可以用来配置单位
+            data_dt_rule: "最新"
+            operators:
+              - "当期值: XX"
+              - "组内排名: XX"
+              - "近3月趋势: XX"
+              - "年同比: XX"
+              - "月环比: XX"
+      (省略)
+```
 
 ##### 彩蛋：展示各机构的主要指标组内排名
 我们通常会关注企业内各经营机构的组内排名，为了方便对经营机构各项指标的排名情况进行概览，只需要进行以下配置，就会在报告的附录中增加主要指标的排名情况，非常直观。

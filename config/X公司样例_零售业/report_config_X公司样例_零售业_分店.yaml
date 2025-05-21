@@ -4,7 +4,7 @@ head:
   data_dt: "2024-12-31"
   org_name: "上海分店 杭州分店 南京分店 广州分店 深圳分店 厦门分店"
   author: "XX事业部"
-
+  desc: "🔴正面 🟢负面 ➖中性 部分指标由于时效性原因取最新数据"
 sections:
   # - section_title: "0 引言"
   #   content: ""

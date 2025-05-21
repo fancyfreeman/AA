@@ -74,7 +74,9 @@ def pp(indicator, value) -> str:
         res = f"{percentage:.2f}个百分点"
     elif any(keyword in indicator for keyword in PERCENTAGE_KEYWORDS):
         res = f"{value:.2%}"
-    elif "客户数" in indicator:
+    elif (
+        "客户数" in indicator or "降级至其它" in indicator or "升级至其它" in indicator
+    ):
         res = f"{int(value)}"
     elif "零售综合考评等级" in indicator:
         mapping = {1: "A", 2: "B", 3: "C"}
@@ -748,9 +750,9 @@ def get_sentiment(
     # 同环比算子
     elif operator in ["YearOverYearOperator", "MonthOverMonthOperator"]:
         if is_negative_indicator and change_value > 0:
-            return positive
-        elif is_negative_indicator and change_value < 0:
             return negative
+        elif is_negative_indicator and change_value < 0:
+            return positive
         elif not is_negative_indicator and change_value > 0:
             return positive
         elif not is_negative_indicator and change_value < 0:
@@ -771,97 +773,3 @@ def get_sentiment(
     # 其他算子情况
     else:
         return neutral
-    # # 同比和环比算子
-    # elif operator in ["YearOverYearOperator", "MonthOverMonthOperator"]:
-    #     change_value = None
-
-    #     # 使用正则表达式匹配文本中的排名位次变化信息
-    #     # 匹配格式为"排名位次上升X位"或"排名位次下降X位"
-    #     rank_change_match = re.search(r"排名位次(上升|下降)(\d+)位", result_str)
-    #     if rank_change_match:
-    #         # 获取变化方向(上升/下降)
-    #         # group(1)表示获取正则表达式中第一个捕获组的内容
-    #         # 例如在正则表达式"(上升|下降)"中,括号内的内容就是第一个捕获组
-    #         # 如果匹配到"上升",则group(1)返回"上升";如果匹配到"下降",则返回"下降"
-    #         direction = rank_change_match.group(1)
-    #         # 获取变化的数值并转为浮点数
-    #         value = float(rank_change_match.group(2))
-    #         # 如果是上升,数值取负;如果是下降,数值保持不变
-    #         # 这样统一了排名变化的表示方式:负值表示排名提升,正值表示排名下降
-    #         change_value = -value
-
-    # # 尝试匹配Bps值
-    # elif "Bps" in result_str:
-    #     bps_match = re.search(r"([+-]?\d+)Bps", result_str)
-    #     if bps_match:
-    #         change_value = float(bps_match.group(1)) / 10000  # 转换回小数形式
-
-    # # 尝试匹配百分点
-    # elif "个百分点" in result_str:
-    #     percent_match = re.search(r"([+-]?\d+\.?\d*)个百分点", result_str)
-    #     if percent_match:
-    #         change_value = float(percent_match.group(1)) / 100  # 转换回小数形式
-
-    # # 尝试匹配一般数值（带符号的数字）
-    # elif not change_value:
-    #     number_match = re.search(r"变动\s+([+-]?\d+\.?\d*)", result_str)
-    #     if number_match:
-    #         change_value = float(number_match.group(1))
-    #     else:
-    #         # 如果上述模式都不匹配，尝试匹配任何数字
-    #         general_number_match = re.search(r"([+-]?\d+\.?\d*)", result_str)
-    #         if general_number_match:
-    #             change_value = float(general_number_match.group(1))
-    #         else:
-    #             # 如果无法提取数值，返回中性情绪
-    #             return neutral
-
-    # # 判断变动值的正负
-    # is_positive_change = change_value > 0
-
-    # # 正向指标，变动为正，为正面；变动为负，为负面
-    # # 负向指标，变动为正，为负面；变动为负，为正面
-    # if is_negative_indicator:
-    #     return positive if not is_positive_change else "Negative"
-    # else:
-    #     return positive if is_positive_change else "Negative"
-
-    # # 排名算子
-    # elif operator == "RankingOperator":
-    #     # 排名算子，需要提取排名信息
-    #     rank_match = re.search(r"第(\d+)名", result_str)
-    #     if rank_match:
-    #         rank_value = int(rank_match.group(1))
-    #         total_match = re.search(r"组内共(\d+)家机构", result_str)
-    #         if total_match:
-    #             total = int(total_match.group(1))
-    #             # 排名在前三分之一为正面，后三分之一为负面
-    #             if rank_value <= total / 3:
-    #                 return positive
-    #             elif rank_value > total * 2 / 3:
-    #                 return negative
-    #             else:
-    #                 return neutral
-    #         else:
-    #             # 无法获取总数，简单判断
-    #             return (
-    #                 "Positive"
-    #                 if rank_value <= 3
-    #                 else ("Neutral" if rank_value <= 10 else "Negative")
-    #             )
-    #     return neutral
-
-    # # 默认情况，尝试提取数值
-    # else:
-    #     # 尝试匹配任何数字
-    #     number_match = re.search(r"([+-]?\d+\.?\d*)", result_str)
-    #     if number_match:
-    #         change_value = float(number_match.group(1))
-    #         is_positive_change = change_value > 0
-
-    #         if is_negative_indicator:
-    #             return positive if not is_positive_change else "Negative"
-    #         else:
-    #             return positive if is_positive_change else "Negative"
-
-    #     return neutral
